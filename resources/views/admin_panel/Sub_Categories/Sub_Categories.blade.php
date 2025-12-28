@@ -12,11 +12,11 @@
                 </div>
                 <div class="page-btn">
                     @if(Auth::user()->usertype === 'admin')
-                    <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSubCategoryModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img"> Add Sub Category
-                    </button>
+                        <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSubCategoryModal">
+                            <img src="assets/img/icons/plus.svg" class="me-1" alt="img"> Add Sub Category
+                        </button>
                     @else
-                    <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
+                        <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
                     @endif
                 </div>
             </div>
@@ -24,9 +24,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -40,22 +40,22 @@
                             </thead>
                             <tbody>
                                 @foreach($Sub_Categories as $key => $subCategory)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $subCategory->category_name }}</td>
-                                    <td>{{ $subCategory->sub_category_name }}</td>
-                                    <td>
-                                        @if(Auth::user()->usertype === 'admin')
-                                        <button class="btn btn-sm btn-primary editSubCategoryBtn"
-                                            data-id="{{ $subCategory->id }}"
-                                            data-category="{{ $subCategory->category_name }}"
-                                            data-subcategory="{{ $subCategory->sub_category_name }}"
-                                            data-bs-toggle="modal" data-bs-target="#editSubCategoryModal">Edit</button>
-                                        @else
-                                        <button class="btn btn-sm btn-danger" disabled>No Action</button>
-                                        @endif
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $subCategory->category_name }}</td>
+                                        <td>{{ $subCategory->sub_category_name }}</td>
+                                        <td>
+                                            @if(Auth::user()->usertype === 'admin')
+                                                <button class="btn btn-sm btn-primary editSubCategoryBtn"
+                                                    data-id="{{ $subCategory->id }}"
+                                                    data-category="{{ $subCategory->category_name }}"
+                                                    data-subcategory="{{ $subCategory->sub_category_name }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editSubCategoryModal">Edit</button>
+                                            @else
+                                                <button class="btn btn-sm btn-danger" disabled>No Action</button>
+                                            @endif
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -67,12 +67,13 @@
 </div>
 
 <!-- Add SubCategory Modal -->
-<div class="modal fade" id="addSubCategoryModal" tabindex="-1" aria-labelledby="addSubCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="addSubCategoryModal" tabindex="-1" aria-labelledby="addSubCategoryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Sub Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-sub-category') }}" method="POST">
                 @csrf
@@ -82,7 +83,7 @@
                         <select class="form-control" name="category_name" required>
                             <option value="" disabled selected>Select Category</option>
                             @foreach($Categories as $category)
-                            <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
+                                <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -100,12 +101,13 @@
 </div>
 
 <!-- Edit SubCategory Modal -->
-<div class="modal fade" id="editSubCategoryModal" tabindex="-1" aria-labelledby="editSubCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="editSubCategoryModal" tabindex="-1" aria-labelledby="editSubCategoryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Sub Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('sub-category.update') }}" method="POST">
                 @csrf
@@ -115,13 +117,14 @@
                         <label class="form-label">Select Category</label>
                         <select class="form-control" name="category_name" id="edit_category_name" required>
                             @foreach($Categories as $category)
-                            <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
+                                <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Sub Category Name</label>
-                        <input type="text" class="form-control" name="sub_category_name" id="edit_sub_category_name" required>
+                        <input type="text" class="form-control" name="sub_category_name" id="edit_sub_category_name"
+                            required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -135,7 +138,7 @@
 @include('admin_panel.include.footer_include')
 
 <script>
-    $(document).on("click", ".editSubCategoryBtn", function() {
+    $(document).on("click", ".editSubCategoryBtn", function () {
         let id = $(this).data("id");
         let category = $(this).data("category");
         let subcategory = $(this).data("subcategory");

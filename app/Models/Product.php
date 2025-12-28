@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
 class Product extends Model
 {
     use HasFactory;
@@ -18,9 +17,15 @@ class Product extends Model
     {
         $prefix = 'COD-';
         $lastcode = self::orderBy('id', 'desc')->first();
-        $lastNumber = $lastcode ? (int)substr($lastcode->item_code, strlen($prefix)) : 0;
+        $lastNumber = $lastcode ? (int) substr($lastcode->item_code, strlen($prefix)) : 0;
         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
         // Return the new invoice number
-        return $prefix . $newNumber;
+        return $prefix.$newNumber;
+    }
+
+    public function stockOuts()
+    {
+        return $this->hasMany(StockOut::class, 'product_id');
     }
 }

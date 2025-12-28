@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expense;
 use App\Models\AddExpense;
+use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,8 +35,8 @@ class ExpenseController extends Controller
             Expense::create([
                 'admin_or_user_id' => $userId,
                 'expense_category' => $request->expense_category, // Ensure the input name matches
-                'created_at'        => Carbon::now(),
-                'updated_at'        => Carbon::now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
 
             return redirect()->back()->with('success', 'Expense created successfully');
@@ -60,7 +60,7 @@ class ExpenseController extends Controller
     {
         $expense = Expense::find($id);
 
-        if (!$expense) {
+        if (! $expense) {
             return response()->json(['error' => 'Expense not found.'], 404);
         }
 
@@ -68,7 +68,6 @@ class ExpenseController extends Controller
 
         return response()->json(['success' => 'Expense deleted successfully.']);
     }
-
 
     public function addExpenseScreen()
     {
@@ -89,7 +88,6 @@ class ExpenseController extends Controller
             return redirect()->back();
         }
     }
-
 
     public function store_addexpense(Request $request)
     {
@@ -136,11 +134,12 @@ class ExpenseController extends Controller
 
         return redirect()->back()->with('success', 'Expense updated successfully.');
     }
+
     public function delete_add_expense($id)
     {
         $expense = AddExpense::find($id);
 
-        if (!$expense) {
+        if (! $expense) {
             return response()->json(['error' => 'Expense not found.'], 404);
         }
 

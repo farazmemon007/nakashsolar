@@ -35,22 +35,20 @@
                             </thead>
                             <tbody>
                                 @foreach($expenses as $key => $expense)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $expense->expense_category }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary editExpenseBtn" 
-                                        data-id="{{ $expense->id }}" 
-                                        data-name="{{ $expense->expense_category }}" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editExpenseModal">Edit</button>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $expense->expense_category }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary editExpenseBtn"
+                                                data-id="{{ $expense->id }}" data-name="{{ $expense->expense_category }}"
+                                                data-bs-toggle="modal" data-bs-target="#editExpenseModal">Edit</button>
 
-                                        <!-- <button class="btn btn-sm btn-danger deleteAddExpenseBtn" data-id="{{ $expense->id }}">Delete</button> -->
+                                            <!-- <button class="btn btn-sm btn-danger deleteAddExpenseBtn" data-id="{{ $expense->id }}">Delete</button> -->
 
-                                    </td>
+                                        </td>
 
-                                    
-                                </tr>
+
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -67,7 +65,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-expense-category') }}" method="POST">
                 @csrf
@@ -92,7 +90,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('expense.update') }}" method="POST">
                 @csrf
@@ -100,7 +98,8 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Expense Name</label>
-                        <input type="text" class="form-control" name="expense_category" id="edit_expense_category" required>
+                        <input type="text" class="form-control" name="expense_category" id="edit_expense_category"
+                            required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -114,18 +113,18 @@
 
 @include('admin_panel.include.footer_include')
 
- <script>
-    $(document).on("click", ".editExpenseBtn", function() {
+<script>
+    $(document).on("click", ".editExpenseBtn", function () {
         let id = $(this).data("id");
         let name = $(this).data("name");
         $("#edit_expense_id").val(id);
         $("#edit_expense_category").val(name);
     });
-    
 
-    
 
-    $(document).on("click", ".deleteAddExpenseBtn", function(e) {
+
+
+    $(document).on("click", ".deleteAddExpenseBtn", function (e) {
         e.preventDefault();
 
         let id = $(this).data("id");
@@ -147,11 +146,11 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") // Include CSRF token
                     },
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire("Deleted!", response.success, "success")
                             .then(() => location.reload());
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.error(xhr.responseText);
                         Swal.fire("Error!", "Something went wrong: " + xhr.responseText, "error");
                     }
@@ -160,4 +159,3 @@
         });
     });
 </script>
-

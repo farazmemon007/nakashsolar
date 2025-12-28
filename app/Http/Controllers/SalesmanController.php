@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Salesman;
-use App\Models\City;
 use App\Models\Area;
+use App\Models\City;
 use App\Models\Designation;
-use Carbon\Carbon;
+use App\Models\Salesman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +22,8 @@ class SalesmanController extends Controller
                 ->get();
             $city = City::where('admin_or_user_id', $userId)->get();
             $designation = Designation::where('admin_or_user_id', $userId)->get(); // Fetch all designations
-            return view('admin_panel.salesmen.add_salesmen', compact('salesmen', 'city', 'designation'));
+
+            return view('admin_panel.salesmen.add_salesman', compact('salesmen', 'city', 'designation'));
         } else {
             return redirect()->back();
         }
@@ -71,13 +71,11 @@ class SalesmanController extends Controller
         }
     }
 
-
-
     public function update_salesman(Request $request)
     {
         $salesman_id = $request->input('salesman_id');
         $salesman = Salesman::find($salesman_id);
-        if (!$salesman) {
+        if (! $salesman) {
             return redirect()->back()->with('error', 'Salesman not found!');
         }
 
@@ -96,15 +94,14 @@ class SalesmanController extends Controller
         return redirect()->back()->with('success', 'Salesman updated successfully');
     }
 
-
     public function getCities()
     {
         $cities = City::select('id', 'city_name')->get();
+
         return response()->json($cities);
     }
 
     public function getAreas(Request $request)
-
     {
         $areas = Area::where('city_name', $request->city)
             ->select('id', 'area_name')
@@ -118,27 +115,24 @@ class SalesmanController extends Controller
         return response()->json(Designation::all());
     }
 
-
-
-
-
-
     public function toggleStatus(Request $request)
     {
         $salesman = Salesman::find($request->salesman_id);
         if ($salesman) {
             $salesman->status = $request->status;
             $salesman->save();
+
             return response()->json(['success' => 'Status updated successfully!']);
         }
+
         return response()->json(['error' => 'Salesman not found!'], 404);
     }
-
 
     public function designation()
     {
         if (Auth::id()) {
             $designations = Designation::where('admin_or_user_id', Auth::id())->get();
+
             return view('admin_panel.salesmen.add_designation', compact('designations'));
         } else {
             return redirect()->back();
@@ -154,24 +148,23 @@ class SalesmanController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
             return redirect()->back()->with('success', 'Designation added successfully');
         } else {
             return redirect()->back();
         }
     }
 
-
-
     public function update_designation(Request $request)
     {
         $request->validate([
             'designation_id' => 'required|exists:designations,id',
-            'designation' => 'required|string|max:255'
+            'designation' => 'required|string|max:255',
         ]);
 
         $designation = Designation::findOrFail($request->designation_id);
         $designation->update([
-            'designation' => $request->designation
+            'designation' => $request->designation,
         ]);
 
         return back()->with('success', 'Designation updated successfully.');
@@ -181,7 +174,7 @@ class SalesmanController extends Controller
     {
         $designation = Designation::find($id);
 
-        if (!$designation) {
+        if (! $designation) {
             return response()->json(['status' => 'error', 'message' => 'Designation not found!']);
         }
 

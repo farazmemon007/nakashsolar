@@ -115,7 +115,8 @@
                                 </table>
 
                                 <div class="d-flex justify-content-end mt-3">
-                                    <button type="submit" class="btn btn-primary" id="submitReturn">Submit Return</button>
+                                    <button type="submit" class="btn btn-primary" id="submitReturn">Submit
+                                        Return</button>
                                 </div>
                             </div>
                         </div>
@@ -131,96 +132,116 @@
 
 <!-- Styles -->
 <style>
-    .table th, .table td { vertical-align: middle !important; }
-    .form-control-plaintext { background-color: #f1f1f1; text-align: center; font-weight: bold; }
-    tfoot td { background-color: #f9f9f9; }
-    .table tfoot tr:last-child td { background-color: #ffe5e5; color: #b30000; font-size: 1rem; }
+    .table th,
+    .table td {
+        vertical-align: middle !important;
+    }
+
+    .form-control-plaintext {
+        background-color: #f1f1f1;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    tfoot td {
+        background-color: #f9f9f9;
+    }
+
+    .table tfoot tr:last-child td {
+        background-color: #ffe5e5;
+        color: #b30000;
+        font-size: 1rem;
+    }
 </style>
 
 <!-- Scripts: jQuery + page logic -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Add these two libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Load invoices for the initial sale_type (if set)
-    function loadInvoices() {
-        let saleType = $('#sale_type').val() || 'customer';
-        let date = $('#invoice_date').val() || '';
+    $(document).ready(function () {
+        // Load invoices for the initial sale_type (if set)
+        function loadInvoices() {
+            let saleType = $('#sale_type').val() || 'customer';
+            let date = $('#invoice_date').val() || '';
 
-        $('#invoice_number').html('<option value="">Loading...</option>');
+            $('#invoice_number').html('<option value="">Loading...</option>');
 
-        $.ajax({
-            url: '{{ route("get-sale-invoices") }}',
-            type: 'GET',
-            data: { sale_type: saleType, date: date },
-            success: function(data) {
-                let options = '<option value="">-- Select Invoice Number --</option>';
-                if (Array.isArray(data) && data.length) {
-                    $.each(data, function(i, inv) {
-                        // store party_id & first_item in data attributes
-                        options += `<option value="${inv.invoice_number}" data-party-id="${inv.party_id ?? ''}" data-first-item="${inv.first_item ?? ''}">${inv.label}</option>`;
-                    });
-                } else {
-                    options = '<option value="">No invoices found</option>';
+            $.ajax({
+                url: '{{ route("get-sale-invoices") }}',
+                type: 'GET',
+                data: { sale_type: saleType, date: date },
+                success: function (data) {
+                    let options = '<option value="">-- Select Invoice Number --</option>';
+                    if (Array.isArray(data) && data.length) {
+                        $.each(data, function (i, inv) {
+                            // store party_id & first_item in data attributes
+                            options += `<option value="${inv.invoice_number}" data-party-id="${inv.party_id ?? ''}" data-first-item="${inv.first_item ?? ''}">${inv.label}</option>`;
+                        });
+                    } else {
+                        options = '<option value="">No invoices found</option>';
+                    }
+                    $('#invoice_number').html(options);
+                },
+                error: function () {
+                    $('#invoice_number').html('<option value="">Failed to load</option>');
                 }
-                $('#invoice_number').html(options);
-            },
-            error: function() {
-                $('#invoice_number').html('<option value="">Failed to load</option>');
-            }
+            });
+        }
+
+        // Initial load
+        loadInvoices();
+
+        // When sale type or date changes -> reload invoices
+        $('#sale_type, #invoice_date').on('change', loadInvoices);
+        $('#refreshInvoices').on('click', loadInvoices);
+
+        // When invoice selected, auto-fill party id if present
+        $('#invoice_number').on('change', function () {
+            let sel = $(this).find('option:selected');
+            $('#party_id').val(sel.data('party-id') || '');
         });
-    }
 
-    // Initial load
-    loadInvoices();
+        // Search and show sale details
+        $('#searchSale').on('click', function () {
+            let saleType = $('#sale_type').val();
+            let invoiceNumber = $('#invoice_number').val();
 
-    // When sale type or date changes -> reload invoices
-    $('#sale_type, #invoice_date').on('change', loadInvoices);
-    $('#refreshInvoices').on('click', loadInvoices);
+            if (!saleType) {
+                alert('Please select Sale Type.');
+                return;
+            }
 
-    // When invoice selected, auto-fill party id if present
-    $('#invoice_number').on('change', function() {
-        let sel = $(this).find('option:selected');
-        $('#party_id').val(sel.data('party-id') || '');
-    });
+            if (!invoiceNumber) {
+                alert('Please select an Invoice Number.');
+                return;
+            }
 
-    // Search and show sale details
-    $('#searchSale').on('click', function() {
-        let saleType = $('#sale_type').val();
-        let invoiceNumber = $('#invoice_number').val();
+            $.ajax({
+                url: '{{ route("fetch-sale-details") }}',
+                type: 'GET',
+                data: { sale_type: saleType, invoice_number: invoiceNumber },
+                success: function (response) {
+                    if (!response.success) {
+                        alert(response.message || 'No sale details found.');
+                        return;
+                    }
 
-        if (!saleType) {
-            alert('Please select Sale Type.');
-            return;
-        }
+                    let tableHTML = '';
+                    let grossAmount = 0;
 
-        if (!invoiceNumber) {
-            alert('Please select an Invoice Number.');
-            return;
-        }
+                    $.each(response.sales, function (index, sale) {
+                        let rate = parseFloat(sale.rate) || 0;
+                        let itemAmount = parseFloat(sale.item_total) || 0;
+                        grossAmount += itemAmount;
 
-        $.ajax({
-            url: '{{ route("fetch-sale-details") }}',
-            type: 'GET',
-            data: { sale_type: saleType, invoice_number: invoiceNumber },
-            success: function(response) {
-                if (!response.success) {
-                    alert(response.message || 'No sale details found.');
-                    return;
-                }
+                        let itemID = sale.item_id ? sale.item_id : '';
 
-                let tableHTML = '';
-                let grossAmount = 0;
-
-                $.each(response.sales, function(index, sale) {
-                    let rate = parseFloat(sale.rate) || 0;
-                    let itemAmount = parseFloat(sale.item_total) || 0;
-                    grossAmount += itemAmount;
-
-                    let itemID = sale.item_id ? sale.item_id : '';
-
-                    tableHTML += `<tr data-item-id="${itemID}">
+                        tableHTML += `<tr data-item-id="${itemID}">
                         <td>${(sale.distributor || sale.customer_name) ?? ''}</td>
                         <td>${sale.invoice_number}</td>
                         <td>${sale.item}</td>
@@ -235,107 +256,107 @@ $(document).ready(function() {
                         <td><input type="number" min="0" class="form-control return-pcs-qty" data-index="${index}" data-rate="${rate}" value="0"></td>
                         <td><input type="text" class="form-control-plaintext return-amount" readonly value="0"></td>
                     </tr>`;
-                });
+                    });
 
-                $('#return-table-body').html(tableHTML);
-                $('#grossAmount').text(grossAmount.toFixed(2));
-                $('#discountAmount').text(parseFloat(response.summary.discount_value || 0).toFixed(2));
-                $('#schemeAmount').text(parseFloat(response.summary.scheme_value || 0).toFixed(2));
-                $('#netAmount').text(parseFloat(response.summary.net_amount || 0).toFixed(2));
-                $('#totalReturnAmount').text(parseFloat(response.summary.total_return_amount || 0).toFixed(2));
-                $('#party_id').val(response.party_id || '');
-            },
-            error: function() {
-                alert('Sale details not found.');
+                    $('#return-table-body').html(tableHTML);
+                    $('#grossAmount').text(grossAmount.toFixed(2));
+                    $('#discountAmount').text(parseFloat(response.summary.discount_value || 0).toFixed(2));
+                    $('#schemeAmount').text(parseFloat(response.summary.scheme_value || 0).toFixed(2));
+                    $('#netAmount').text(parseFloat(response.summary.net_amount || 0).toFixed(2));
+                    $('#totalReturnAmount').text(parseFloat(response.summary.total_return_amount || 0).toFixed(2));
+                    $('#party_id').val(response.party_id || '');
+                },
+                error: function () {
+                    alert('Sale details not found.');
+                }
+            });
+        });
+
+        // Recalculate return amount when user inputs quantities
+        $(document).on('input', '.return-carton-qty, .return-pcs-qty', function () {
+            let $row = $(this).closest('tr');
+            let rate = parseFloat($row.find('.return-carton-qty').data('rate')) || 0;
+            let pcsPerCarton = parseFloat($row.find('td:nth-child(4)').text()) || 1;
+            let returnCartonQty = parseFloat($row.find('.return-carton-qty').val()) || 0;
+            let returnPcsQty = parseFloat($row.find('.return-pcs-qty').val()) || 0;
+
+            let returnAmount = (rate * returnCartonQty) + ((rate / pcsPerCarton) * returnPcsQty);
+            $row.find('.return-amount').val(returnAmount.toFixed(2));
+
+            // update total
+            let totalReturnAmount = 0;
+            $('.return-amount').each(function () {
+                totalReturnAmount += parseFloat($(this).val()) || 0;
+            });
+            $('#totalReturnAmount').text(totalReturnAmount.toFixed(2));
+        });
+
+        // Submit return (AJAX)
+        $('#sale-return-form').on('submit', function (e) {
+            e.preventDefault();
+
+            let saleType = $('#sale_type').val();
+            let invoiceNumber = $('#invoice_number').val();
+            let partyId = $('#party_id').val();
+
+            let returnItems = [];
+            $('#return-table-body tr').each(function () {
+                let $tr = $(this);
+                let item = {
+                    item_id: $tr.data('item-id') || null,
+                    item_name: $tr.find('td:eq(2)').text(),
+                    pcs_per_carton: parseInt($tr.find('td:eq(3)').text()) || 0,
+                    carton_qty: parseInt($tr.find('.return-carton-qty').val()) || 0,
+                    pcs_qty: parseInt($tr.find('.return-pcs-qty').val()) || 0,
+                    rate: parseFloat($tr.find('td:eq(7)').text()) || 0,
+                    discount: parseFloat($tr.find('td:eq(8)').text()) || 0,
+                    total: parseFloat($tr.find('.return-amount').val()) || 0
+                };
+
+                if (item.carton_qty > 0 || item.pcs_qty > 0) {
+                    returnItems.push(item);
+                }
+            });
+
+            if (returnItems.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'No items selected', text: 'Please enter return quantity for at least one item.' });
+                return;
             }
-        });
-    });
 
-    // Recalculate return amount when user inputs quantities
-    $(document).on('input', '.return-carton-qty, .return-pcs-qty', function() {
-        let $row = $(this).closest('tr');
-        let rate = parseFloat($row.find('.return-carton-qty').data('rate')) || 0;
-        let pcsPerCarton = parseFloat($row.find('td:nth-child(4)').text()) || 1;
-        let returnCartonQty = parseFloat($row.find('.return-carton-qty').val()) || 0;
-        let returnPcsQty = parseFloat($row.find('.return-pcs-qty').val()) || 0;
-
-        let returnAmount = (rate * returnCartonQty) + ((rate / pcsPerCarton) * returnPcsQty);
-        $row.find('.return-amount').val(returnAmount.toFixed(2));
-
-        // update total
-        let totalReturnAmount = 0;
-        $('.return-amount').each(function() {
-            totalReturnAmount += parseFloat($(this).val()) || 0;
-        });
-        $('#totalReturnAmount').text(totalReturnAmount.toFixed(2));
-    });
-
-    // Submit return (AJAX)
-    $('#sale-return-form').on('submit', function(e) {
-        e.preventDefault();
-
-        let saleType = $('#sale_type').val();
-        let invoiceNumber = $('#invoice_number').val();
-        let partyId = $('#party_id').val();
-
-        let returnItems = [];
-        $('#return-table-body tr').each(function() {
-            let $tr = $(this);
-            let item = {
-                item_id: $tr.data('item-id') || null,
-                item_name: $tr.find('td:eq(2)').text(),
-                pcs_per_carton: parseInt($tr.find('td:eq(3)').text()) || 0,
-                carton_qty: parseInt($tr.find('.return-carton-qty').val()) || 0,
-                pcs_qty: parseInt($tr.find('.return-pcs-qty').val()) || 0,
-                rate: parseFloat($tr.find('td:eq(7)').text()) || 0,
-                discount: parseFloat($tr.find('td:eq(8)').text()) || 0,
-                total: parseFloat($tr.find('.return-amount').val()) || 0
+            // Compose payload
+            let payload = {
+                sale_type: saleType,
+                invoice_number: invoiceNumber,
+                party_id: partyId,
+                invoice_date: $('#invoice_date').val() || null,
+                return_items: returnItems,
+                _token: '{{ csrf_token() }}'
             };
 
-            if (item.carton_qty > 0 || item.pcs_qty > 0) {
-                returnItems.push(item);
-            }
-        });
-
-        if (returnItems.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'No items selected', text: 'Please enter return quantity for at least one item.' });
-            return;
-        }
-
-        // Compose payload
-        let payload = {
-            sale_type: saleType,
-            invoice_number: invoiceNumber,
-            party_id: partyId,
-            invoice_date: $('#invoice_date').val() || null,
-            return_items: returnItems,
-            _token: '{{ csrf_token() }}'
-        };
-
-        $.ajax({
-            url: '{{ route("sale-return.store") }}',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function(res) {
-                if (res.success) {
-                    Swal.fire({ icon: 'success', title: 'Saved', text: res.message || 'Sale return recorded.' }).then(() => {
-                        // reset form and reload invoices
-                        $('#sale-return-form')[0].reset();
-                        $('#return-table-body').html('');
-                        $('#grossAmount, #discountAmount, #schemeAmount, #netAmount, #totalReturnAmount').text('0.00');
-                        loadInvoices();
-                    });
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Failed', text: res.message || 'Could not save return.' });
+            $.ajax({
+                url: '{{ route("sale-return.store") }}',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({ icon: 'success', title: 'Saved', text: res.message || 'Sale return recorded.' }).then(() => {
+                            // reset form and reload invoices
+                            $('#sale-return-form')[0].reset();
+                            $('#return-table-body').html('');
+                            $('#grossAmount, #discountAmount, #schemeAmount, #netAmount, #totalReturnAmount').text('0.00');
+                            loadInvoices();
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Failed', text: res.message || 'Could not save return.' });
+                    }
+                },
+                error: function (xhr) {
+                    let msg = 'Failed to submit sale return. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                    Swal.fire({ icon: 'error', title: 'Error', text: msg });
                 }
-            },
-            error: function(xhr) {
-                let msg = 'Failed to submit sale return. Please try again.';
-                if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                Swal.fire({ icon: 'error', title: 'Error', text: msg });
-            }
+            });
         });
     });
-});
 </script>

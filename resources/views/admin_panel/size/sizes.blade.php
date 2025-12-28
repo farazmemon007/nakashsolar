@@ -12,11 +12,11 @@
                 </div>
                 <div class="page-btn">
                     @if(Auth::user()->usertype === 'admin')
-                    <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSizeModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Size
-                    </button>
+                        <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSizeModal">
+                            <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Size
+                        </button>
                     @else
-                    <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
+                        <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
                     @endif
                 </div>
             </div>
@@ -24,9 +24,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -39,17 +39,19 @@
                             </thead>
                             <tbody>
                                 @foreach($Sizes as $key => $size)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $size->size_name }}</td>
-                                    <td>
-                                        @if(Auth::user()->usertype === 'admin')
-                                        <button class="btn btn-sm btn-primary editSizeBtn" data-id="{{ $size->id }}" data-name="{{ $size->size_name }}" data-bs-toggle="modal" data-bs-target="#editSizeModal">Edit</button>
-                                        @else
-                                        <button class="btn btn-sm btn-danger " disabled>No Action</button>
-                                        @endif
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $size->size_name }}</td>
+                                        <td>
+                                            @if(Auth::user()->usertype === 'admin')
+                                                <button class="btn btn-sm btn-primary editSizeBtn" data-id="{{ $size->id }}"
+                                                    data-name="{{ $size->size_name }}" data-bs-toggle="modal"
+                                                    data-bs-target="#editSizeModal">Edit</button>
+                                            @else
+                                                <button class="btn btn-sm btn-danger " disabled>No Action</button>
+                                            @endif
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -66,7 +68,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Size</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-size') }}" method="POST">
                 @csrf
@@ -90,7 +92,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Size</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('size.update') }}" method="POST">
                 @csrf
@@ -112,7 +114,7 @@
 @include('admin_panel.include.footer_include')
 
 <script>
-    $(document).on("click", ".editSizeBtn", function() {
+    $(document).on("click", ".editSizeBtn", function () {
         let id = $(this).data("id");
         let name = $(this).data("name");
         $("#edit_size_id").val(id);

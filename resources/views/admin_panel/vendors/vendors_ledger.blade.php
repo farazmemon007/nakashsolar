@@ -36,7 +36,7 @@
                             <tbody>
                                 @if($VendorLedgers->isEmpty())
                                     <script>
-                                        document.addEventListener("DOMContentLoaded", function() {
+                                        document.addEventListener("DOMContentLoaded", function () {
                                             document.getElementById("global-loader").style.display = "none";
                                         });
                                     </script>
@@ -49,8 +49,9 @@
                                         <td>{{ $ledger->vendor->Party_name }}</td>
                                         <td>{{ number_format($ledger->opening_balance, 0) }}</td>
                                         <td>{{ number_format($ledger->previous_balance, 0) }}</td>
-                                        <td id="closing_balance_{{ $ledger->id }}">{{ number_format($ledger->closing_balance, 0) }}</td>
-                                       
+                                        <td id="closing_balance_{{ $ledger->id }}">
+                                            {{ number_format($ledger->closing_balance, 0) }}</td>
+
                                     </tr>
                                 @empty
                                     <tr>

@@ -19,6 +19,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\SalesmanController;
 use App\Http\Controllers\SizeController;
+use App\Http\Controllers\StockOutController;
 use App\Http\Controllers\VendorController;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,7 @@ Route::post('/sub-category/update', [CategoryAndSubCategoryController::class, 'u
 Route::get('/size', [SizeController::class, 'size'])->name('size');
 Route::post('/store-size', [SizeController::class, 'store_size'])->name('store-size');
 Route::post('/size/update', [SizeController::class, 'update'])->name('size.update');
+
 // business_tpye
 Route::get('/business-type', [Business_tpyeController::class, 'index'])->name('business_type');
 Route::post('/business-type/store', [Business_tpyeController::class, 'store'])->name('business_type.store');
@@ -98,6 +100,12 @@ Route::get('/add-expenses', [ExpenseController::class, 'addExpenseScreen'])->nam
 Route::post('/store-expense', [ExpenseController::class, 'store_addexpense'])->name('store-expense'); // Store new expense
 Route::post('/update-expense', [ExpenseController::class, 'update_addexpense'])->name('update-expense'); // Update existing expense
 Route::delete('/delete-expense/{id}', [ExpenseController::class, 'delete_add_expense'])->name('delete-expense');
+
+// StockOut Routes
+Route::get('/stockout', [StockOutController::class, 'stockout'])->name('stockout.index');
+Route::post('/store-stockout', [StockOutController::class, 'store_stockout'])->name('store-stockout');
+Route::post('/update-stockout', [StockOutController::class, 'update_stockout'])->name('update-stockout');
+Route::delete('/delete-stockout', [StockOutController::class, 'delete_stockout'])->name('delete-stockout');
 
 // Product
 Route::get('/product', [ProductController::class, 'product'])->name('product');

@@ -3,7 +3,8 @@
     @include('admin_panel.include.navbar_include')
     @include('admin_panel.include.admin_sidebar_include')
     <!-- Edit Payment Modal -->
-    <div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <form action="{{ route('update-vendor-payment') }}" method="POST">
                 @csrf
@@ -11,7 +12,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Vendor Payment</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close text-black" data-bs-dismiss="modal"
+                            aria-label="Close">X</button>
                     </div>
                     <div class="modal-body">
 
@@ -70,9 +72,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -89,33 +91,30 @@
                             </thead>
                             <tbody>
                                 @foreach($VendorPayments as $key => $VendorPayment)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $VendorPayment->payment_date }}</td>
-                                    <td>{{ $VendorPayment->vendor->Party_code ?? 'N/A' }}</td>
-                                    <td>{{ $VendorPayment->vendor->Party_name ?? 'N/A' }}</td>
-                                    <td>{{ $VendorPayment->amount_paid }}</td>
-                                    <td>{{ $VendorPayment->description }}</td>
-                                    <td>
-                                        <button
-                                            class="btn btn-sm btn-primary editPaymentBtn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editPaymentModal"
-                                            data-id="{{ $VendorPayment->id }}"
-                                            data-amount="{{ $VendorPayment->amount_paid }}"
-                                            data-date="{{ $VendorPayment->payment_date }}"
-                                            data-description="{{ $VendorPayment->description }}"
-                                            data-vendor="{{ $VendorPayment->vendor->Party_name ?? 'N/A' }}">
-                                            Edit
-                                        </button>
-                                    </td>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $VendorPayment->payment_date }}</td>
+                                        <td>{{ $VendorPayment->vendor->Party_code ?? 'N/A' }}</td>
+                                        <td>{{ $VendorPayment->vendor->Party_name ?? 'N/A' }}</td>
+                                        <td>{{ $VendorPayment->amount_paid }}</td>
+                                        <td>{{ $VendorPayment->description }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary editPaymentBtn" data-bs-toggle="modal"
+                                                data-bs-target="#editPaymentModal" data-id="{{ $VendorPayment->id }}"
+                                                data-amount="{{ $VendorPayment->amount_paid }}"
+                                                data-date="{{ $VendorPayment->payment_date }}"
+                                                data-description="{{ $VendorPayment->description }}"
+                                                data-vendor="{{ $VendorPayment->vendor->Party_name ?? 'N/A' }}">
+                                                Edit
+                                            </button>
+                                        </td>
 
-                                </tr>
+                                    </tr>
                                 @endforeach
                                 @if($VendorPayments->isEmpty())
-                                <tr>
-                                    <td colspan="7" class="text-center">No Payments found.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="7" class="text-center">No Payments found.</td>
+                                    </tr>
                                 @endif
                             </tbody>
                         </table>
@@ -129,11 +128,11 @@
 @include('admin_panel.include.footer_include')
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const modal = document.getElementById('editPaymentModal');
 
         document.querySelectorAll('.editPaymentBtn').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 document.getElementById('modal_payment_id').value = this.dataset.id;
                 document.getElementById('modal_amount_paid').value = this.dataset.amount;
                 document.getElementById('modal_vendor_name').value = this.dataset.vendor;

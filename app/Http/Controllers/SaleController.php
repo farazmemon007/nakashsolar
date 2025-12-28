@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Distributor;
 use App\Models\DistributorLedger;
-use App\Models\DistributorSaleReturn;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Salesman;
@@ -122,7 +121,7 @@ class SaleController extends Controller
                     'admin_or_user_id' => $userId,
                     'previous_balance' => $newPreviousBalance,
                     'closing_balance' => $newClosingBalance,
-                    'updated_at'        => Carbon::now(),
+                    'updated_at' => Carbon::now(),
                 ]
             );
 
@@ -176,16 +175,11 @@ class SaleController extends Controller
                 }
             }
 
-
-
             return redirect()->route('sale.invoice', $sale->id)->with('success', 'Sale recorded successfully and stock updated!');
         } else {
             return redirect()->back();
         }
     }
-
-
-
 
     public function all_sale()
     {
@@ -208,7 +202,6 @@ class SaleController extends Controller
             return redirect()->back();
         }
     }
-
 
     public function show_sale($id)
     {
@@ -238,8 +231,6 @@ class SaleController extends Controller
         return view('admin_panel.sale.invoice', compact('sale', 'distributorLedger'));
     }
 
-
-
     public function saleEdit($id)
     {
         if (Auth::id()) {
@@ -249,6 +240,7 @@ class SaleController extends Controller
             $categories = Category::where('admin_or_user_id', $userId)->get();  // all categories from DB
             $Staffs = Salesman::where('admin_or_user_id', $userId)->get();
             $original = Sale::findOrFail($id);
+
             return view('admin_panel.sale.edit_sale', compact('Distributors', 'categories', 'Staffs', 'original'));
         } else {
             return redirect()->back();
@@ -283,12 +275,11 @@ class SaleController extends Controller
 
             $sale = Sale::findOrFail($id);
 
-            $oldItems   = json_decode($sale->item, true) ?? [];
+            $oldItems = json_decode($sale->item, true) ?? [];
             $oldAmounts = json_decode($sale->amount, true) ?? [];
 
-
             // STEP 2: NEW values from request
-            $newItems   = $request->item;
+            $newItems = $request->item;
             $newAmounts = $request->amount;
 
             // STEP 3: Calculate difference before updating
@@ -296,13 +287,13 @@ class SaleController extends Controller
 
             // Newly added items
             foreach ($newItems as $index => $itemName) {
-                if (!in_array($itemName, $oldItems)) {
+                if (! in_array($itemName, $oldItems)) {
                     $diffAmount += (float) $newAmounts[$index];
                 }
             }
             // Removed items
             foreach ($oldItems as $index => $itemName) {
-                if (!in_array($itemName, $newItems)) {
+                if (! in_array($itemName, $newItems)) {
                     $diffAmount -= (float) $oldAmounts[$index];
                 }
             }
@@ -325,7 +316,6 @@ class SaleController extends Controller
                     'updated_at' => now(),
                 ]);
             }
-
 
             // Update sale data
             $sale->update([
@@ -355,7 +345,6 @@ class SaleController extends Controller
                 'net_amount' => $request->net_amount,
             ]);
 
-
             // Update stock quantities based on new data
             foreach ($request->code as $index => $item_code) {
                 $product = Product::where('item_code', $item_code)->first();
@@ -380,7 +369,6 @@ class SaleController extends Controller
             return redirect()->back();
         }
     }
-
 
     public function delete($id)
     {

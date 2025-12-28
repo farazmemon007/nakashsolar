@@ -20,9 +20,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -39,30 +39,29 @@
                             </thead>
                             <tbody>
                                 @foreach($expenses as $key => $expense)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($expense->date)->format('d/m/Y') }}</td>
-                                    <td>{{ $expense->title }}</td>
-                                    <td>{{ $expense->expense_category }}</td>
-                                    <td>{{ $expense->description }}</td>
-                                    <td>{{ $expense->amount }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary editExpenseBtn"
-                                            data-id="{{ $expense->id }}"
-                                            data-category="{{ $expense->expense_category }}"
-                                            data-title="{{ $expense->title }}"
-                                            data-amount="{{ $expense->amount }}"
-                                            data-date="{{ $expense->date }}"
-                                            data-description="{{ $expense->description }}"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editExpenseModal">
-                                            Edit
-                                        </button>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($expense->date)->format('d/m/Y') }}</td>
+                                        <td>{{ $expense->title }}</td>
+                                        <td>{{ $expense->expense_category }}</td>
+                                        <td>{{ $expense->description }}</td>
+                                        <td>{{ $expense->amount }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary editExpenseBtn"
+                                                data-id="{{ $expense->id }}"
+                                                data-category="{{ $expense->expense_category }}"
+                                                data-title="{{ $expense->title }}" data-amount="{{ $expense->amount }}"
+                                                data-date="{{ $expense->date }}"
+                                                data-description="{{ $expense->description }}" data-bs-toggle="modal"
+                                                data-bs-target="#editExpenseModal">
+                                                Edit
+                                            </button>
 
-                                        <button class="btn btn-sm btn-danger deleteExpenseBtn" data-id="{{ $expense->id }}">Delete</button>
+                                            <button class="btn btn-sm btn-danger deleteExpenseBtn"
+                                                data-id="{{ $expense->id }}">Delete</button>
 
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -79,7 +78,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-expense') }}" method="POST">
                 @csrf
@@ -91,7 +90,7 @@
                         <select class="form-control" name="expense_category" required>
                             <option value="">Select Category</option>
                             @foreach($expenseCategories as $category)
-                            <option value="{{ $category->expense_category }}">{{ $category->expense_category }}</option>
+                                <option value="{{ $category->expense_category }}">{{ $category->expense_category }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -125,7 +124,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('update-expense') }}" method="POST">
                 @csrf
@@ -136,7 +135,7 @@
                         <select class="form-control" id="edit_expense_category" name="expense_category" required>
                             <option value="">Select Category</option>
                             @foreach($expenseCategories as $category)
-                            <option value="{{ $category->expense_category }}">{{ $category->expense_category }}</option>
+                                <option value="{{ $category->expense_category }}">{{ $category->expense_category }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -172,7 +171,7 @@
 
 <script>
     // DELETE Expense with SweetAlert and AJAX
-    $(document).on("click", ".deleteExpenseBtn", function(e) {
+    $(document).on("click", ".deleteExpenseBtn", function (e) {
         e.preventDefault();
 
         let id = $(this).data("id");
@@ -194,11 +193,11 @@
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") // Include CSRF token
                     },
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire("Deleted!", response.success, "success")
                             .then(() => location.reload());
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.error(xhr.responseText);
                         Swal.fire("Error!", "Something went wrong: " + xhr.responseText, "error");
                     }
@@ -208,7 +207,7 @@
     });
 
     // EDIT Expense - Filling Modal Data
-    $(document).on("click", ".editExpenseBtn", function() {
+    $(document).on("click", ".editExpenseBtn", function () {
         let id = $(this).data("id");
         let category = $(this).data("category");
         let title = $(this).data("title");
@@ -220,7 +219,7 @@
         $("#edit_expense_category").val(category);
 
         // Properly selecting the category in dropdown
-        $("#edit_expense_category option").each(function() {
+        $("#edit_expense_category option").each(function () {
             $(this).prop("selected", $(this).val() == category);
         });
 

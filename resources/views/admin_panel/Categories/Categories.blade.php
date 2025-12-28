@@ -12,11 +12,11 @@
                 </div>
                 <div class="page-btn">
                     @if(Auth::user()->usertype === 'admin')
-                    <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Category
-                    </button>
+                        <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                            <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Category
+                        </button>
                     @else
-                    <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
+                        <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>
                     @endif
                 </div>
             </div>
@@ -24,9 +24,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -39,23 +39,22 @@
                             </thead>
                             <tbody>
                                 @foreach($Categories as $key => $category)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $category->category_name }}</td>
-                                    <td>
-                                        @if(Auth::user()->usertype === 'admin')
-                                        <button class="btn btn-sm btn-primary editCategoryBtn"
-                                            data-id="{{ $category->id }}"
-                                            data-name="{{ $category->category_name }}"
-                                            data-bs-toggle="modal" data-bs-target="#editCategoryModal">Edit
-                                        </button>
-                                        @else
-                                        <button class="btn btn-sm btn-danger " disabled>No Action</button>
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $category->category_name }}</td>
+                                        <td>
+                                            @if(Auth::user()->usertype === 'admin')
+                                                <button class="btn btn-sm btn-primary editCategoryBtn"
+                                                    data-id="{{ $category->id }}" data-name="{{ $category->category_name }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editCategoryModal">Edit
+                                                </button>
+                                            @else
+                                                <button class="btn btn-sm btn-danger " disabled>No Action</button>
 
-                                        @endif
+                                            @endif
 
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -72,7 +71,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-category') }}" method="POST">
                 @csrf
@@ -91,12 +90,13 @@
 </div>
 
 <!-- Edit Category Modal -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('category.update') }}" method="POST">
                 @csrf
@@ -118,7 +118,7 @@
 @include('admin_panel.include.footer_include')
 
 <script>
-    $(document).on("click", ".editCategoryBtn", function() {
+    $(document).on("click", ".editCategoryBtn", function () {
         let id = $(this).data("id");
         let name = $(this).data("name");
         $("#edit_category_id").val(id);

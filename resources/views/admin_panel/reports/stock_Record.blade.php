@@ -67,7 +67,7 @@
                             <select class="form-control category-select">
                                 <option value="all">All</option>
                                 @foreach($categories as $category)
-                                <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
+                                    <option value="{{ $category->category_name }}">{{ $category->category_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -145,7 +145,7 @@
 
 <script>
     // Fetch Subcategories on Category Change
-    $(document).on('change', '.category-select', function() {
+    $(document).on('change', '.category-select', function () {
         let categoryName = $(this).val();
         let subCategoryDropdown = $('.subcategory-select');
 
@@ -153,9 +153,9 @@
             $.ajax({
                 url: "{{ route('get.subcategories', ':categoryname') }}".replace(':categoryname', categoryName),
                 type: 'GET',
-                success: function(response) {
+                success: function (response) {
                     subCategoryDropdown.html('<option value="all">All</option>');
-                    $.each(response, function(index, name) {
+                    $.each(response, function (index, name) {
                         subCategoryDropdown.append(`<option value="${name}">${name}</option>`);
                     });
                 }
@@ -166,7 +166,7 @@
     });
 
     // Fetch Items on Subcategory Change
-    $(document).on('change', '.subcategory-select', function() {
+    $(document).on('change', '.subcategory-select', function () {
         let subCategoryName = $(this).val();
         let itemDropdown = $('.item-select');
 
@@ -174,9 +174,9 @@
             $.ajax({
                 url: "{{ route('get.items.report', ':subcategory') }}".replace(':subcategory', subCategoryName),
                 type: 'GET',
-                success: function(response) {
+                success: function (response) {
                     itemDropdown.html('<option value="all">All</option>');
-                    $.each(response, function(index, item) {
+                    $.each(response, function (index, item) {
                         itemDropdown.append(`<option value="${item.item_code}">${item.item_name}</option>`);
                     });
                 }
@@ -188,12 +188,12 @@
 
     function calculateSubtotal() {
         let totalStockValue = 0;
-        $(".total-stock-value").each(function() {
+        $(".total-stock-value").each(function () {
             totalStockValue += parseFloat($(this).text()) || 0;
         });
         $("#subtotalStockValue").text(totalStockValue.toFixed(2));
     }
-    $(document).on('click', '.search-item', function() {
+    $(document).on('click', '.search-item', function () {
         let category = $('.category-select').val();
         let subcategory = $('.subcategory-select').val();
         let itemCode = $('.item-select').val();
@@ -207,7 +207,7 @@
                 subcategory,
                 itemCode
             },
-            success: function(response) {
+            success: function (response) {
                 console.log(response);
 
                 let tableContent = '';
@@ -222,21 +222,21 @@
                 let totalStock = 0;
                 let totalDistributorReturn = 0;
                 let totalLocalReturn = 0;
-                $.each(response, function(index, item) {
+                $.each(response, function (index, item) {
                     let stockValue = item.carton_quantity * item.wholesale_price;
                     totalStockValue += stockValue;
 
                     let sizeValue = 0;
-                    let sizeText = item.size.toLowerCase().trim();
+                    let sizeText = (item.size ?? '').toString().toLowerCase().trim();
 
-                    // ✅ Enhanced Size Calculation Logic
                     if (sizeText.includes('ml')) {
-                        sizeValue = parseFloat(sizeText.replace(/[^0-9.]/g, '')) / 1000; // Convert ml to liters
+                        sizeValue = parseFloat(sizeText.replace(/[^0-9.]/g, '')) / 1000;
                     } else if (sizeText.includes('liter') || sizeText.includes('l')) {
                         sizeValue = parseFloat(sizeText.replace(/[^0-9.]/g, ''));
                     } else {
                         sizeValue = parseFloat(sizeText) || 0;
                     }
+
 
                     // ✅ Liter Calculation (including pieces in carton and carton quantity)
                     let liters = sizeValue * item.pcs_in_carton * item.carton_quantity;
@@ -301,7 +301,7 @@
 
 
 
-    $(document).on('click', '#exportPdf', function() {
+    $(document).on('click', '#exportPdf', function () {
         const {
             jsPDF
         } = window.jspdf;
@@ -320,7 +320,7 @@
 
         let img = new Image();
         img.src = logoUrl;
-        img.onload = function() {
+        img.onload = function () {
             pdf.addImage(img, 'JPEG', logoX, 10, logoWidth, logoHeight); // Logo position
 
             // ✅ Add Title Below Logo

@@ -15,9 +15,9 @@
             <div class="card p-4">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
 
                     <div class="table-responsive">
@@ -38,28 +38,30 @@
                             </thead>
                             <tbody>
                                 @forelse($CustomerLedgers as $ledger)
-                                <tr>
-                                    <td>{{ $ledger->customer_id }}</td>
-                                    <td>{{ $ledger->Customer ? $ledger->Customer->shop_name : '-' }}</td>
-                                    <td>{{ $ledger->Customer ? $ledger->Customer->customer_name : '-' }}</td>
-                                    <td>{{ $ledger->Customer ? $ledger->Customer->area : '-' }}</td>
-                                    <td>{{ $ledger->Customer ? $ledger->Customer->business_type_name : '-' }}</td>
-                                    <td>{{ number_format($ledger->opening_balance, 0) }}</td>
-                                    <td>{{ number_format($ledger->previous_balance, 0) }}</td>
-                                    <td id="closing_balance_{{ $ledger->id }}">{{ number_format($ledger->closing_balance, 0) }}</td>
-                                    <td>{{ $ledger->updated_at->format('Y-m-d H:i:s') }}</td>
-                                    <td>
-                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recoveryModal"
-                                            data-id="{{ $ledger->id }}"
-                                            data-closing-balance="{{ $ledger->closing_balance }}">
-                                            Add Recovery
-                                        </button>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $ledger->customer_id }}</td>
+                                        <td>{{ $ledger->Customer ? $ledger->Customer->shop_name : '-' }}</td>
+                                        <td>{{ $ledger->Customer ? $ledger->Customer->customer_name : '-' }}</td>
+                                        <td>{{ $ledger->Customer ? $ledger->Customer->area : '-' }}</td>
+                                        <td>{{ $ledger->Customer ? $ledger->Customer->business_type_name : '-' }}</td>
+                                        <td>{{ number_format($ledger->opening_balance, 0) }}</td>
+                                        <td>{{ number_format($ledger->previous_balance, 0) }}</td>
+                                        <td id="closing_balance_{{ $ledger->id }}">
+                                            {{ number_format($ledger->closing_balance, 0) }}
+                                        </td>
+                                        <td>{{ $ledger->updated_at->format('Y-m-d H:i:s') }}</td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#recoveryModal" data-id="{{ $ledger->id }}"
+                                                data-closing-balance="{{ $ledger->closing_balance }}">
+                                                Add Recovery
+                                            </button>
+                                        </td>
+                                    </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="8" class="text-center">No records found.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No records found.</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -77,7 +79,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="recoveryModalLabel">Add Recovery</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <div class="modal-body">
                 <form id="recoveryForm">
@@ -96,7 +98,7 @@
                         <select class="form-control" id="salesman" name="salesman" required>
                             <option value="" disabled>Select Salesman</option>
                             @foreach($Salesmans as $saleman)
-                            <option value="{{ $saleman->name }}">{{ $saleman->name }}</option>
+                                <option value="{{ $saleman->name }}">{{ $saleman->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -118,10 +120,10 @@
 @include('admin_panel.include.footer_include')
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         var recoveryModal = document.getElementById('recoveryModal');
 
-        recoveryModal.addEventListener('show.bs.modal', function(event) {
+        recoveryModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var ledgerId = button.getAttribute('data-id');
             var closingBalance = button.getAttribute('data-closing-balance');
@@ -130,17 +132,17 @@
             document.getElementById('closing_balance').value = closingBalance;
         });
 
-        document.getElementById('recoveryForm').addEventListener('submit', function(event) {
+        document.getElementById('recoveryForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
             var formData = new FormData(this);
             fetch("{{ route('customer-recovery-store') }}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
-                    },
-                    body: formData
-                })
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                },
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

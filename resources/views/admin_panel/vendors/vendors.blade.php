@@ -12,11 +12,11 @@
                 </div>
                 <div class="page-btn">
                     @if(Auth::user()->usertype === 'admin')
-                    <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addVendorModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img"> Add Vendor
-                    </button>
+                        <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addVendorModal">
+                            <img src="assets/img/icons/plus.svg" class="me-1" alt="img"> Add Vendor
+                        </button>
                     @else
-                    <button class="btn btn-sm btn-danger" disabled>No Action</button>
+                        <button class="btn btn-sm btn-danger" disabled>No Action</button>
                     @endif
                 </div>
             </div>
@@ -24,9 +24,9 @@
             <div class="card">
                 <div class="card-body">
                     @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        <strong>Success!</strong> {{ session('success') }}.
-                    </div>
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> {{ session('success') }}.
+                        </div>
                     @endif
                     <div class="table-responsive">
                         <table class="table datanew">
@@ -46,37 +46,34 @@
                             </thead>
                             <tbody>
                                 @foreach($Vendors as $key => $Vendor)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $Vendor->Party_code }}</td>
-                                    <td>{{ $Vendor->Party_name }}</td>
-                                    <td>{{ $Vendor->City }}</td>
-                                    <td>{{ $Vendor->Area }}</td>
-                                    @if(Auth::user()->usertype === 'admin')
-                                        <td>{{ $Vendor->Party_address }}</td>
-                                        <td>{{ $Vendor->Party_phone }}</td>
-                                    @endif
-                                    <td>
-                                        <!-- Edit Button with Admin Check -->
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $Vendor->Party_code }}</td>
+                                        <td>{{ $Vendor->Party_name }}</td>
+                                        <td>{{ $Vendor->City }}</td>
+                                        <td>{{ $Vendor->Area }}</td>
                                         @if(Auth::user()->usertype === 'admin')
-                                        <button class="btn btn-sm btn-primary editVendorBtn"
-                                            data-id="{{ $Vendor->id }}"
-                                            data-name="{{ $Vendor->Party_code }}"
-                                            data-Party_name="{{ $Vendor->Party_name }}"
-                                            data-city="{{ $Vendor->City }}"
-                                            data-area="{{ $Vendor->Area }}"
-                                            data-Party_address="{{ $Vendor->Party_address }}"
-                                            data-Party_phone="{{ $Vendor->Party_phone }}"
-                                            data-email="{{ $Vendor->email }}"
-                                            data-password="{{ $Vendor->password }}"
-                                            data-bs-toggle="modal" data-bs-target="#editVendorModal">
-                                            Edit
-                                        </button>
-                                        @else
-                                        <button class="btn btn-sm btn-danger" disabled>No Action</button>
+                                            <td>{{ $Vendor->Party_address }}</td>
+                                            <td>{{ $Vendor->Party_phone }}</td>
                                         @endif
-                                    </td>
-                                </tr>
+                                        <td>
+                                            <!-- Edit Button with Admin Check -->
+                                            @if(Auth::user()->usertype === 'admin')
+                                                <button class="btn btn-sm btn-primary editVendorBtn" data-id="{{ $Vendor->id }}"
+                                                    data-name="{{ $Vendor->Party_code }}"
+                                                    data-Party_name="{{ $Vendor->Party_name }}" data-city="{{ $Vendor->City }}"
+                                                    data-area="{{ $Vendor->Area }}"
+                                                    data-Party_address="{{ $Vendor->Party_address }}"
+                                                    data-Party_phone="{{ $Vendor->Party_phone }}"
+                                                    data-email="{{ $Vendor->email }}" data-password="{{ $Vendor->password }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editVendorModal">
+                                                    Edit
+                                                </button>
+                                            @else
+                                                <button class="btn btn-sm btn-danger" disabled>No Action</button>
+                                            @endif
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -92,7 +89,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Create Vendor</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('store-vendors') }}" method="POST">
                 @csrf
@@ -113,7 +110,7 @@
                             <select class="form-control" name="city" id="citySelect" required>
                                 <option value="" disabled selected>Select City</option>
                                 @foreach($cities as $city)
-                                <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
+                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -153,7 +150,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Vendor</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form id="editVendorForm" method="POST">
                 @csrf
@@ -176,7 +173,7 @@
                             <select class="form-control" name="city" id="edit_city" required>
                                 <option value="" disabled selected>Select City</option>
                                 @foreach($cities as $city)
-                                <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
+                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -190,7 +187,8 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Address</label>
-                            <input type="text" name="Party_address" value="Party_address" id="edit_Party_address" class="form-control" required>
+                            <input type="text" name="Party_address" value="Party_address" id="edit_Party_address"
+                                class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Phone</label>
@@ -245,7 +243,7 @@
         }
     }
 
-    $(document).on("click", ".editVendorBtn", function() {
+    $(document).on("click", ".editVendorBtn", function () {
         let id = $(this).data("id");
         let name = $(this).data("name");
         let Party_name = $(this).data("party_name");
@@ -268,7 +266,7 @@
         $.ajax({
             url: `{{ route('vendor.ledger', '') }}/${id}`,
             type: 'GET',
-            success: function(response) {
+            success: function (response) {
                 $("#existing_opening_balance").val(response.opening_balance);
             }
         });
@@ -279,9 +277,9 @@
             data: {
                 city_id: city
             },
-            success: function(response) {
+            success: function (response) {
                 $('#edit_area').html('<option value="">Select Area</option>');
-                $.each(response, function(index, value) {
+                $.each(response, function (index, value) {
                     let selected = (value === area) ? 'selected' : '';
                     $('#edit_area').append('<option value="' + value + '" ' + selected + '>' + value + '</option>');
                 });
@@ -294,7 +292,7 @@
     });
 
 
-    $('#citySelect').change(function() {
+    $('#citySelect').change(function () {
         let cityId = $(this).val();
         $.ajax({
             url: '{{ route("get-areas") }}',
@@ -302,16 +300,16 @@
             data: {
                 city_id: cityId
             },
-            success: function(response) {
+            success: function (response) {
                 $('#areaSelect').html('<option value="">Select Area</option>');
-                $.each(response, function(id, area) {
+                $.each(response, function (id, area) {
                     $('#areaSelect').append('<option value="' + area + '">' + area + '</option>');
                 });
             }
         });
     });
 
-    $('#edit_city').change(function() {
+    $('#edit_city').change(function () {
         let cityId = $(this).val();
         $.ajax({
             url: '{{ route("get-areas") }}',
@@ -319,9 +317,9 @@
             data: {
                 city_id: cityId
             },
-            success: function(response) {
+            success: function (response) {
                 $('#edit_area').html('<option value="">Select Area</option>');
-                $.each(response, function(id, area) {
+                $.each(response, function (id, area) {
                     $('#edit_area').append('<option value="' + area + '">' + area + '</option>');
                 });
             }

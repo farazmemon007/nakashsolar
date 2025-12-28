@@ -18,9 +18,9 @@
             </div>
 
             @if (session()->has('success'))
-            <div class="alert alert-success">
-                <strong>Success!</strong> {{ session('success') }}.
-            </div>
+                <div class="alert alert-success">
+                    <strong>Success!</strong> {{ session('success') }}.
+                </div>
             @endif
 
             <div class="container">
@@ -41,29 +41,32 @@
                         </thead>
                         <tbody>
                             @foreach($customers as $key => $customer)
-                            <tr>
-                                <td>{{ $key + 1 }}</td>
-                                <td>{{ $customer->shop_name }}</td>
-                                <td>{{ $customer->address }}</td>
-                                <td>{{ $customer->customer_name }}</td>
-                                <td>{{ $customer->phone_number }}</td>
-                                <td>{{ $customer->city ?? 'N/A' }}</td>
-                                <td>{{ $customer->area ?? 'N/A' }}</td>
-                                <td>{{ $customer->business_type_name ?? 'N/A' }}</td>
-                                <td>
-                                    @if(Auth::check() && Auth::user()->usertype == 'admin')
-                                    <button class="btn btn-sm btn-warning editCustomerBtn" data-id="{{ $customer->id }}">Edit</button>
-                                    <button class="btn btn-sm btn-danger deleteCustomerBtn" data-id="{{ $customer->id }}">Delete</button>
-                                    @endif
-                                    @if(Auth::check() && Auth::user()->usertype == 'distributor')
-                                    <button class="btn btn-sm btn-warning editCustomerBtn" data-id="{{ $customer->id }}">Edit</button>
-                                    @endif
-                                    @if(Auth::check() && Auth::user()->usertype == 'salesman')
-                                    <span class="btn btn-danger btn-sm">No Action Given</span>
-                                    @endif
+                                <tr>
+                                    <td>{{ $key + 1 }}</td>
+                                    <td>{{ $customer->shop_name }}</td>
+                                    <td>{{ $customer->address }}</td>
+                                    <td>{{ $customer->customer_name }}</td>
+                                    <td>{{ $customer->phone_number }}</td>
+                                    <td>{{ $customer->city ?? 'N/A' }}</td>
+                                    <td>{{ $customer->area ?? 'N/A' }}</td>
+                                    <td>{{ $customer->business_type_name ?? 'N/A' }}</td>
+                                    <td>
+                                        @if(Auth::check() && Auth::user()->usertype == 'admin')
+                                            <button class="btn btn-sm btn-warning editCustomerBtn"
+                                                data-id="{{ $customer->id }}">Edit</button>
+                                            <button class="btn btn-sm btn-danger deleteCustomerBtn"
+                                                data-id="{{ $customer->id }}">Delete</button>
+                                        @endif
+                                        @if(Auth::check() && Auth::user()->usertype == 'distributor')
+                                            <button class="btn btn-sm btn-warning editCustomerBtn"
+                                                data-id="{{ $customer->id }}">Edit</button>
+                                        @endif
+                                        @if(Auth::check() && Auth::user()->usertype == 'salesman')
+                                            <span class="btn btn-danger btn-sm">No Action Given</span>
+                                        @endif
 
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -82,21 +85,24 @@
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close text-black" data-bs-dismiss="modal">X</button>
                 </div>
                 <div class="modal-body">
 
                     <input type="text" name="shop_name" class="form-control mt-2" placeholder="Shop Name" required>
                     <input type="text" name="address" class="form-control mt-2" placeholder="Address" required>
-                    <input type="text" name="customer_name" class="form-control mt-2" placeholder="ShopKeeper Name" required>
-                    <input type="text" name="phone_number" class="form-control mt-2" placeholder="Phone Number" required>
-                    <input type="number" name="opening_balance" class="form-control mt-2" placeholder="Opening Balance" required>
+                    <input type="text" name="customer_name" class="form-control mt-2" placeholder="ShopKeeper Name"
+                        required>
+                    <input type="text" name="phone_number" class="form-control mt-2" placeholder="Phone Number"
+                        required>
+                    <input type="number" name="opening_balance" class="form-control mt-2" placeholder="Opening Balance"
+                        required>
                     <div class="row mt-3">
                         <div class="col-md-6">
                             <select class="form-control" name="city" id="citySelect" required>
                                 <option value="">Select City</option>
                                 @foreach($cities as $city)
-                                <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
+                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
                                 @endforeach
                             </select>
 
@@ -107,7 +113,8 @@
                             </select>
                         </div>
                     </div>
-                    <select name="business_type_id" id="businessTypeDropdown" class="form-control mt-2" required></select>
+                    <select name="business_type_id" id="businessTypeDropdown" class="form-control mt-2"
+                        required></select>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Save</button>
@@ -118,12 +125,13 @@
 </div>
 
 <!-- Edit Customer Modal -->
-<div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+<div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg for larger size -->
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Customer</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <form action="{{ route('customers.update') }}" method="POST">
                 @csrf
@@ -143,7 +151,8 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">ShopKeeper Name</label>
-                            <input type="text" class="form-control" name="customer_name" id="edit_customer_name" required>
+                            <input type="text" class="form-control" name="customer_name" id="edit_customer_name"
+                                required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Phone Number</label>
@@ -156,7 +165,7 @@
                             <select class="form-control" name="city" id="edit_citySelect" required>
                                 <option value="">Select City</option>
                                 @foreach($cities as $city)
-                                <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
+                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -177,7 +186,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Opening Balance</label>
-                            <input type="number" class="form-control" name="opening_balance" id="edit_opening_balance" required>
+                            <input type="number" class="form-control" name="opening_balance" id="edit_opening_balance"
+                                required>
                         </div>
                     </div>
 
@@ -210,13 +220,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $(document).on("click", ".editCustomerBtn", function() {
+    $(document).on("click", ".editCustomerBtn", function () {
         let id = $(this).data("id");
 
         $.ajax({
             url: "{{ route('customer.edit', ':id') }}".replace(':id', id),
             type: "GET",
-            success: function(response) {
+            success: function (response) {
                 $("#edit_customer_id").val(response.id);
                 $("#edit_customer_name").val(response.customer_name);
                 $("#edit_phone_number").val(response.phone_number);
@@ -225,7 +235,7 @@
                 $("#edit_opening_balance").val(response.ledger.opening_balance);
                 $("#edit_business_type").html('<option value="">Select Business Type</option>');
 
-                $.each(response.business_types, function(index, type) {
+                $.each(response.business_types, function (index, type) {
                     let selected = (type.business_type_name === response.business_type_name) ? 'selected' : '';
                     $("#edit_business_type").append(`<option value="${type.business_type_name}" ${selected}>${type.business_type_name}</option>`);
                 });
@@ -239,9 +249,9 @@
                     data: {
                         city_id: response.city
                     },
-                    success: function(data) {
+                    success: function (data) {
                         $("#edit_areasSelect").html('<option value="">Select Area</option>');
-                        $.each(data, function(key, area) {
+                        $.each(data, function (key, area) {
                             let selected = (area.area_name === response.area) ? 'selected' : '';
                             $("#edit_areasSelect").append(`<option value="${area.area_name}" ${selected}>${area.area_name}</option>`);
                         });
@@ -254,7 +264,7 @@
     });
 
 
-    $(document).on("click", ".deleteCustomerBtn", function(e) {
+    $(document).on("click", ".deleteCustomerBtn", function (e) {
         e.preventDefault();
         let customerId = $(this).data("id");
 
@@ -274,7 +284,7 @@
                     data: {
                         _token: "{{ csrf_token() }}"
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status === "success") {
                             Swal.fire("Deleted!", response.message, "success");
                             location.reload(); // Refresh page
@@ -282,7 +292,7 @@
                             Swal.fire("Error!", response.message, "error");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         Swal.fire("Error!", "Something went wrong.", "error");
                     }
                 });
@@ -290,17 +300,17 @@
         });
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Fetch Business Types
-        $.get("{{ route('fetch-business-types') }}", function(data) {
+        $.get("{{ route('fetch-business-types') }}", function (data) {
             $('#businessTypeDropdown').html('<option value="">Select Business Type</option>');
-            $.each(data, function(index, type) {
+            $.each(data, function (index, type) {
                 $('#businessTypeDropdown').append('<option value="' + type.business_type_name + '">' + type.business_type_name + '</option>');
             });
         });
 
         // Delete Customer
-        $('.deleteCustomerBtn').click(function() {
+        $('.deleteCustomerBtn').click(function () {
             let customerId = $(this).data('id');
             Swal.fire({
                 title: "Are you sure?",
@@ -318,7 +328,7 @@
                         data: {
                             _token: "{{ csrf_token() }}"
                         },
-                        success: function(response) {
+                        success: function (response) {
                             Swal.fire("Deleted!", response.success, "success").then(() => location.reload());
                         }
                     });
@@ -326,9 +336,9 @@
             });
         });
     });
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Add Product Modal: Fetch areas on Category Change
-        $('#citySelect').change(function() {
+        $('#citySelect').change(function () {
             var cityId = $(this).val();
             $('#areasSelect').html('<option value="">Loading...</option>');
 
@@ -339,13 +349,13 @@
                     data: {
                         city_id: cityId
                     },
-                    success: function(data) {
+                    success: function (data) {
                         $('#areasSelect').html('<option value="">Select Area</option>');
-                        $.each(data, function(key, area) {
+                        $.each(data, function (key, area) {
                             $('#areasSelect').append('<option value="' + area.area_name + '">' + area.area_name + '</option>');
                         });
                     },
-                    error: function() {
+                    error: function () {
                         alert('Error fetching areas.');
                     }
                 });

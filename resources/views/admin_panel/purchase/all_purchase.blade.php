@@ -108,37 +108,37 @@
                                         <td>{{ $purchase->vendor?->Party_name ?? 'N/A' }}</td>
 
                                         <td>
-                                            @foreach(json_decode($purchase->category) as $category)
+                                            @foreach(json_decode($purchase->category ?? '[]') as $category)
                                                 {{ $category }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->subcategory) as $subcategory)
+                                            @foreach(json_decode($purchase->subcategory ?? '[]') as $subcategory)
                                                 {{ $subcategory }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->item) as $item)
+                                            @foreach(json_decode($purchase->item ?? '[]') as $item)
                                                 {{ $item }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->rate) as $rate)
+                                            @foreach(json_decode($purchase->rate ?? '[]') as $rate)
                                                 {{ $rate }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->carton_qty) as $carton_qty)
+                                            @foreach(json_decode($purchase->carton_qty ?? '[]') as $carton_qty)
                                                 {{ $carton_qty }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->pcs) as $pcs)
+                                            @foreach(json_decode($purchase->pcs ?? '[]') as $pcs)
                                                 {{ $pcs }},
                                             @endforeach
                                         </td>
                                         <td>
-                                            @foreach(json_decode($purchase->amount) as $amount)
+                                            @foreach(json_decode($purchase->amount ?? '[]') as $amount)
                                                 {{ $amount }},
                                             @endforeach
                                         </td>
@@ -158,15 +158,15 @@
                                             </a>
 
                                             <!-- <button class="btn btn-success btn-sm pay-btn"
-                                                            data-id="{{ $purchase->id }}"
-                                                            data-invoice-no="{{ $purchase->invoice_number }}"
-                                                            data-vendor-id="{{ $purchase->vendor->id }}"
-                                                            data-grand-total="{{ $purchase->grand_total }}"
-                                                            data-remaining-amount="{{ $purchase->remaining_amount }}"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#payModal">
-                                                            Pay
-                                                        </button> -->
+                                                                                            data-id="{{ $purchase->id }}"
+                                                                                            data-invoice-no="{{ $purchase->invoice_number }}"
+                                                                                            data-vendor-id="{{ $purchase->vendor->id }}"
+                                                                                            data-grand-total="{{ $purchase->grand_total }}"
+                                                                                            data-remaining-amount="{{ $purchase->remaining_amount }}"
+                                                                                            data-bs-toggle="modal"
+                                                                                            data-bs-target="#payModal">
+                                                                                            Pay
+                                                                                        </button> -->
 
                                         </td>
                                     </tr>

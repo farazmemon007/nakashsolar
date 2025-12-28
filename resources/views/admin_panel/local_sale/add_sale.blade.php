@@ -8,7 +8,7 @@
 
     .table td,
     .table th {
-        vertical-align: middle
+        vertical-align: middle;
     }
 
     .qty-box {
@@ -23,9 +23,7 @@
         overflow-x: hidden
     }
 
-    .table-responsive {
-        overflow-x: auto
-    }
+
 
     @media(max-width:992px) {
         .qty-box {
@@ -47,75 +45,75 @@
                 @csrf
 
                 {{-- ================= PARTY ================= --}}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="row g-3">
+                <div class="container-fluid">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row g-3">
 
-    <div class="col-md-3">
-        <label>Party Type</label>
-        <select id="partyType" name="party_type" class="form-control">
-            <option value="customer">Customer</option>
-            <option value="vendor">Vendor</option>
-            <option value="walkin">Walk-In</option>
-        </select>
-    </div>
+                                <div class="col-md-6">
+                                    <label>Party Type</label>
+                                    <select id="partyType" name="party_type" class="form-control">
+                                        <option value="customer">Customer</option>
+                                        <option value="vendor">Vendor</option>
+                                        <option value="walkin">Walk-In</option>
+                                    </select>
+                                </div>
 
-    <div class="col-md-3 party-box" id="customerBox">
-        <label>Customer</label>
-        <select class="form-control" name="customer_id" id="customer">
-            <option value="">Select</option>
-            @foreach ($Customers as $c)
-                <option value="{{ $c->id }}"
-                    data-phone="{{ $c->phone_number }}"
-                    data-address="{{ $c->address }}">
-                    {{ $c->shop_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+                                <div class="col-md-6 party-box" id="customerBox">
+                                    <label>Customer</label>
+                                    <select class="form-control" name="customer_id" id="customer">
+                                        <option value="">Select</option>
+                                        @foreach ($Customers as $c)
+                                            <option value="{{ $c->id }}" data-phone="{{ $c->phone_number }}"
+                                                data-address="{{ $c->address }}">
+                                                {{ $c->shop_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-    <div class="col-md-3 party-box d-none" id="vendorBox">
-        <label>Vendor</label>
-        <select class="form-control" name="vendor_id" id="vendor">
-            <option value="">Select</option>
-            @foreach ($Vendors as $v)
-                <option value="{{ $v->id }}"
-                    data-phone="{{ $v->Party_phone }}"
-                    data-address="{{ $v->Party_address }}">
-                    {{ $v->Party_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+                                <div class="col-md-3 party-box d-none" id="vendorBox">
+                                    <label>Vendor</label>
+                                    <select class="form-control" name="vendor_id" id="vendor">
+                                        <option value="">Select</option>
+                                        @foreach ($Vendors as $v)
+                                            <option value="{{ $v->id }}" data-phone="{{ $v->Party_phone }}"
+                                                data-address="{{ $v->Party_address }}">
+                                                {{ $v->Party_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-    <div class="col-md-3 readonly-wrap">
-        <label>Phone</label>
-        <input id="phone" class="form-control readonly-box" readonly>
-    </div>
+                                <div class="col-md-3 readonly-wrap">
+                                    <label>Phone</label>
+                                    <input id="phone" class="form-control readonly-box" readonly>
+                                </div>
 
-    <div class="col-md-3 readonly-wrap">
-        <label>Address</label>
-        <input id="address" class="form-control readonly-box" readonly>
-    </div>
+                                <div class="col-md-3 readonly-wrap">
+                                    <label>Address</label>
+                                    <input id="address" class="form-control readonly-box" readonly>
+                                </div>
 
-    <!-- WALK-IN (same grid size, same place) -->
-    <div class="col-md-3 d-none" id="walkinName">
-        <label>Name</label>
-        <input name="walkin_name" class="form-control">
-    </div>
+                                <!-- WALK-IN (same grid size, same place) -->
+                                <div class="col-md-3 d-none" id="walkinName">
+                                    <label>Name</label>
+                                    <input name="walkin_name" class="form-control">
+                                </div>
 
-    <div class="col-md-3 d-none" id="walkinPhone">
-        <label>Phone</label>
-        <input name="walkin_phone" class="form-control">
-    </div>
+                                <div class="col-md-3 d-none" id="walkinPhone">
+                                    <label>Phone</label>
+                                    <input name="walkin_phone" class="form-control">
+                                </div>
 
-    <div class="col-md-3 d-none" id="walkinAddress">
-        <label>Address</label>
-        <input name="walkin_address" class="form-control">
-    </div>
+                                <div class="col-md-3 d-none" id="walkinAddress">
+                                    <label>Address</label>
+                                    <input name="walkin_address" class="form-control">
+                                </div>
 
-</div>
+                            </div>
 
+                        </div>
                     </div>
                 </div>
 
@@ -135,7 +133,6 @@
                                         <th>Rate</th>
                                         <th>Qty</th>
                                         <th>Total</th>
-                                        <th></th>
                                     </tr>
                                 </thead>
 
@@ -163,8 +160,7 @@
                                             <div class="qty-box">
                                                 <button type="button"
                                                     class="btn btn-sm btn-secondary qty-minus">−</button>
-                                                <input name="qty[]" class="form-control qty text-center"
-                                                    value="1">
+                                                <input name="qty[]" class="form-control qty text-center" value="1">
                                                 <button type="button"
                                                     class="btn btn-sm btn-secondary qty-plus">+</button>
                                             </div>
@@ -224,35 +220,35 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @if(session('success'))
-<script>
-Swal.fire({
-    icon: 'success',
-    title: 'Success',
-    text: "{{ session('success') }}",
-    timer: 2000,
-    showConfirmButton: false
-});
-</script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: "{{ session('success') }}",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
 @endif
 
 @if(session('error'))
-<script>
-Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: "{{ session('error') }}"
-});
-</script>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "{{ session('error') }}"
+        });
+    </script>
 @endif
 
 @if ($errors->any())
-<script>
-Swal.fire({
-    icon: 'error',
-    title: 'Validation Error',
-    html: `{!! implode('<br>', $errors->all()) !!}`
-});
-</script>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: `{!! implode('<br>', $errors->all()) !!}`
+        });
+    </script>
 @endif
 
 
@@ -260,102 +256,107 @@ Swal.fire({
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- Add these two libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
     /* PARTY SWITCH */
-   $('#partyType').on('change', function () {
-    let t = this.value;
+    $('#partyType').on('change', function () {
+        let t = this.value;
 
-    // hide all
-    $('#customerBox,#vendorBox').addClass('d-none');
-    $('#walkinName,#walkinPhone,#walkinAddress').addClass('d-none');
-    $('.readonly-wrap').addClass('d-none');
+        // hide all
+        $('#customerBox,#vendorBox').addClass('d-none');
+        $('#walkinName,#walkinPhone,#walkinAddress').addClass('d-none');
+        $('.readonly-wrap').addClass('d-none');
 
-    // reset payment fields
-    $('#advance').prop('readonly', false);
-    $('#remaining').closest('.col-md-3').removeClass('d-none');
+        // reset payment fields
+        $('#advance').prop('readonly', false);
+        $('#remaining').closest('.col-md-3').removeClass('d-none');
 
-    if (t === 'customer') {
-        $('#customerBox').removeClass('d-none');
-        $('.readonly-wrap').removeClass('d-none');
-    }
+        if (t === 'customer') {
+            $('#customerBox').removeClass('d-none');
+            $('.readonly-wrap').removeClass('d-none');
+        }
 
-    if (t === 'vendor') {
-        $('#vendorBox').removeClass('d-none');
-        $('.readonly-wrap').removeClass('d-none');
-    }
+        if (t === 'vendor') {
+            $('#vendorBox').removeClass('d-none');
+            $('.readonly-wrap').removeClass('d-none');
+        }
 
-    if (t === 'walkin') {
-        $('#walkinName,#walkinPhone,#walkinAddress').removeClass('d-none');
+        if (t === 'walkin') {
+            $('#walkinName,#walkinPhone,#walkinAddress').removeClass('d-none');
 
-        // ✅ WALK-IN RULE
-        $('#advance').val($('#grandTotal').val()).prop('readonly', true);
-        $('#remaining').val('0');
-        $('#remaining').closest('.col-md-3').addClass('d-none');
-    }
+            // ✅ WALK-IN RULE
+            $('#advance').val($('#grandTotal').val()).prop('readonly', true);
+            $('#remaining').val('0');
+            $('#remaining').closest('.col-md-3').addClass('d-none');
+        }
 
-    calcGrand();
-});
+        calcGrand();
+    });
 
-$('#partyType').trigger('change');
+    $('#partyType').trigger('change');
 
 
     /* AUTO FILL */
-    $('#customer').on('change', function() {
+    $('#customer').on('change', function () {
         let o = $('option:selected', this);
         $('#phone').val(o.data('phone') || '');
         $('#address').val(o.data('address') || '');
     });
-    $('#vendor').on('change', function() {
+    $('#vendor').on('change', function () {
         let o = $('option:selected', this);
         $('#phone').val(o.data('phone') || '');
         $('#address').val(o.data('address') || '');
     });
 
     /* SIZE PARSER */
-  function toFeet(value, unit) {
-    if (!value) return 0;
+    function toFeet(value, unit) {
+        if (!value) return 0;
 
-    value = value.toString().trim();
-    let parts = value.split('.');
+        value = value.toString().trim();
+        let parts = value.split('.');
 
-    let whole = parseInt(parts[0]) || 0;
-    let decimal = parts[1] ? parseInt(parts[1]) : 0;
+        let whole = parseInt(parts[0]) || 0;
+        let decimal = parts[1] ? parseInt(parts[1]) : 0;
 
-    // ===== FEET SELECTED =====
-    if (unit === 'ft') {
-        // decimal = inches
-        return whole + (decimal / 12);
+        // ===== FEET SELECTED =====
+        if (unit === 'ft') {
+            // decimal = inches
+            return whole + (decimal / 12);
+        }
+
+        // ===== INCH SELECTED =====
+        // decimal = millimeter
+        let inches = whole + (decimal / 25.4);
+        return inches / 12;
     }
-
-    // ===== INCH SELECTED =====
-    // decimal = millimeter
-    let inches = whole + (decimal / 25.4);
-    return inches / 12;
-}
 
 
 
 
     /* CALC */
-   function calcRow(r) {
+    function calcRow(r) {
 
-    let unit = r.find('.unit').val(); // ft | inch
+        let unit = r.find('.unit').val(); // ft | inch
 
-    let h = toFeet(r.find('.height').val(), unit);
-    let w = toFeet(r.find('.width').val(), unit);
+        let h = toFeet(r.find('.height').val(), unit);
+        let w = toFeet(r.find('.width').val(), unit);
 
-    let rate = parseFloat(r.find('.rate').val()) || 0;
-    let qty  = parseFloat(r.find('.qty').val())  || 1;
+        let rate = parseFloat(r.find('.rate').val()) || 0;
+        let qty = parseFloat(r.find('.qty').val()) || 1;
 
-    let area = h * w;
+        let area = h * w;
 
-    // FINAL AREA (AS REQUIRED)
-    r.find('.area').val(area ? area.toFixed(2) : '');
+        // FINAL AREA (AS REQUIRED)
+        r.find('.area').val(area ? area.toFixed(2) : '');
 
-    r.find('.item-total').val((area * rate * qty).toFixed(2));
+        r.find('.item-total').val((area * rate * qty).toFixed(2));
 
-    calcGrand();
-}
+        calcGrand();
+    }
 
 
 
@@ -402,14 +403,12 @@ $('#partyType').trigger('change');
     $('#advance,[name="gross_discount"]').on('input', calcGrand);
 
     $('form').on('submit', function () {
-    calcGrand();
+        calcGrand();
 
-    if (!$('#netAmount').val() || $('#netAmount').val() <= 0) {
-        Swal.fire('Error', 'Please add at least one item', 'error');
-        return false;
-    }
-});
+        if (!$('#netAmount').val() || $('#netAmount').val() <= 0) {
+            Swal.fire('Error', 'Please add at least one item', 'error');
+            return false;
+        }
+    });
 
 </script>
-
-

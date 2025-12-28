@@ -47,36 +47,49 @@
                                         <td class="amount_paid">{{ number_format($recovery->amount_paid, 0) }}</td>
                                         <td class="remarks">{{ $recovery->remarks }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-primary text-white" data-bs-toggle="modal" data-bs-target="#editRecoveryModal{{ $recovery->id }}">
+                                            <button type="button" class="btn btn-sm btn-primary text-white"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editRecoveryModal{{ $recovery->id }}">
                                                 Edit
                                             </button>
 
                                             <!-- Modal -->
-                                            <div class="modal fade" id="editRecoveryModal{{ $recovery->id }}" tabindex="-1" aria-labelledby="editRecoveryModalLabel{{ $recovery->id }}" aria-hidden="true">
+                                            <div class="modal fade" id="editRecoveryModal{{ $recovery->id }}" tabindex="-1"
+                                                aria-labelledby="editRecoveryModalLabel{{ $recovery->id }}"
+                                                aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
-                                                        <form method="POST" action="{{ route('customer_recovery.update', $recovery->id) }}">
+                                                        <form method="POST"
+                                                            action="{{ route('customer_recovery.update', $recovery->id) }}">
                                                             @csrf
                                                             @method('PUT')
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title" id="editRecoveryModalLabel{{ $recovery->id }}">Edit Customer Recovery</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                <h5 class="modal-title"
+                                                                    id="editRecoveryModalLabel{{ $recovery->id }}">Edit
+                                                                    Customer Recovery</h5>
+                                                                <button type="button" class="btn-close text-black"
+                                                                    data-bs-dismiss="modal" aria-label="Close">X</button>
                                                             </div>
 
                                                             <div class="modal-body">
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Customer</label>
-                                                                    <input type="text" class="form-control" value="{{ $recovery->customer->customer_name ?? 'N/A' }}" readonly>
+                                                                    <input type="text" class="form-control"
+                                                                        value="{{ $recovery->customer->customer_name ?? 'N/A' }}"
+                                                                        readonly>
                                                                 </div>
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Salesman</label>
-                                                                    <input type="text" class="form-control" value="{{ $recovery->salesman }}" readonly>
+                                                                    <input type="text" class="form-control"
+                                                                        value="{{ $recovery->salesman }}" readonly>
                                                                 </div>
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Current Amount Paid</label>
-                                                                    <input type="text" class="form-control" value="{{ number_format($recovery->amount_paid, 0) }}" readonly>
+                                                                    <input type="text" class="form-control"
+                                                                        value="{{ number_format($recovery->amount_paid, 0) }}"
+                                                                        readonly>
                                                                 </div>
 
                                                                 <div class="mb-3">
@@ -90,25 +103,31 @@
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Adjustment Amount</label>
-                                                                    <input type="number" name="adjust_amount" class="form-control" min="0" step="any" required>
+                                                                    <input type="number" name="adjust_amount"
+                                                                        class="form-control" min="0" step="any" required>
                                                                 </div>
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Date</label>
-                                                                    <input type="date" name="date" class="form-control" value="{{ $recovery->date }}" required>
+                                                                    <input type="date" name="date" class="form-control"
+                                                                        value="{{ $recovery->date }}" required>
                                                                 </div>
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Remarks</label>
-                                                                    <textarea name="remarks" class="form-control">{{ $recovery->remarks }}</textarea>
+                                                                    <textarea name="remarks"
+                                                                        class="form-control">{{ $recovery->remarks }}</textarea>
                                                                 </div>
 
-                                                                <div class="alert alert-danger d-none" id="editRecoveryError{{ $recovery->id }}"></div>
+                                                                <div class="alert alert-danger d-none"
+                                                                    id="editRecoveryError{{ $recovery->id }}"></div>
                                                             </div>
 
                                                             <div class="modal-footer">
-                                                                <button type="submit" class="btn btn-primary">Update Recovery</button>
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-primary">Update
+                                                                    Recovery</button>
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Cancel</button>
                                                             </div>
                                                         </form>
                                                     </div>
