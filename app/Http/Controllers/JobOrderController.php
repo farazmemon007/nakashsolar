@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\JobOrder;
 use App\Models\LocalSale;
-use App\Models\StockOut;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class JobOrderController extends Controller
 {
-    /* ================= INDEX ================= */
     public function index()
     {
         $userId = Auth::id();
@@ -31,72 +29,117 @@ class JobOrderController extends Controller
         );
     }
 
-    /* =====================================================
-       FETCH SALE ITEMS (FOR WORK TYPE ASSIGNMENT)
-       ===================================================== */
     public function getSaleDetails($saleId)
     {
-        $items = StockOut::where('local_sale_id', $saleId)
-            ->select('id', 'item', 'qty')
-            ->get();
+        $sale = LocalSale::where('id', $saleId)->first();
+
+        if (! $sale) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sale not found',
+            ], 404);
+        }
+
+        $items = json_decode($sale->item, true) ?? [];
+        $qtys = json_decode($sale->qty, true) ?? [];
+        $units = json_decode($sale->unit, true) ?? [];
+        $amounts = json_decode($sale->amount, true) ?? [];
+
+        $formattedItems = [];
+
+        foreach ($items as $index => $name) {
+            $formattedItems[] = [
+                'id' => $sale->id,
+                'item' => $name,
+                'qty' => $qtys[$index] ?? 1,
+                'unit' => $units[$index] ?? null,
+                'rate' => $amounts[$index] ?? 0,
+            ];
+        }
 
         return response()->json([
             'status' => true,
-            'items' => $items,
+            'items' => $formattedItems,
         ]);
     }
 
-    /* ================= STORE JOB ================= */
     public function store(Request $request)
     {
-        $request->validate([
-            'job_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
-            'work_types' => 'required|array',
-        ]);
-
-        DB::transaction(function () use ($request) {
-
-            /* ---------- JOB HEADER ---------- */
-            $job = JobOrder::create([
-                'admin_or_user_id' => Auth::id(),
-                'job_order_no' => 'JOB-'.str_pad(JobOrder::max('id') + 1, 4, '0', STR_PAD_LEFT),
-                'job_date' => $request->job_date,
-                'total_amount' => $request->total_amount,
-                'paid_amount' => $request->paid_amount ?? 0,
-                'remaining_amount' => $request->total_amount - ($request->paid_amount ?? 0),
-                'status' => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
+        try {
+            $request->validate([
+                'sale_id' => 'required',
+                'job_date' => 'required|date',
+                'total_amount' => 'required|numeric|min:0',
+                'work_types' => 'required|array',
             ]);
 
-            /* ---------- WORK TYPES + ITEMS ---------- */
-            foreach ($request->work_types as $workType) {
+            DB::transaction(function () use ($request) {
 
-                foreach ($workType['items'] as $item) {
+                /* ---------- JOB HEADER ---------- */
+                $job = JobOrder::create([
+                    'admin_or_user_id' => Auth::id(),
+                    'staff_id' => Auth::id(),
+                    'job_order_no' => 'JOB-'.str_pad((JobOrder::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT),
+                    'job_date' => $request->job_date,
+                    'total_amount' => $request->total_amount,
+                    'paid_amount' => $request->paid_amount ?? 0,
+                    'remaining_amount' => $request->total_amount - ($request->paid_amount ?? 0),
+                    'status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-                    DB::table('job_items')->insert([
-                        'job_order_id' => $job->id,
-                        'work_type' => $workType['name'],              // Glass / Aluminium
-                        'assign_type' => $workType['assign_type'],       // labour / contract
-                        'contractor' => $workType['contractor'] ?? null,
-                        'item_id' => $item['id'],
-                        'qty' => $item['qty'],
-                        'rate' => $item['rate'],
-                        'total' => $item['qty'] * $item['rate'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                /* ---------- WORK TYPES + ITEMS ---------- */
+                foreach ($request->work_types as $workType) {
+                    foreach ($workType['items'] as $item) {
+                        DB::table('job_items')->insert([
+                            'job_order_id' => $job->id,
+                            'work_type' => $workType['name'],
+                            'assign_type' => $workType['assign_type'],
+                            'contractor' => $workType['contractor'] ?? null,
+                            'item_id' => $item['id'] ?? null,
+                            'item_name' => $item['name'],
+                            'qty' => $item['qty'],
+                            'rate' => $item['rate'],
+                            'total' => $item['qty'] * $item['rate'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
-            }
-        });
+            });
 
-        return redirect()
-            ->route('job-orders.index')
-            ->with('success', 'Job Order created successfully');
+            // AJAX response - NOT redirect!
+            return redirect()
+                ->route('job-orders.index')
+                ->with('success', 'Job Order created successfully');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
-    /* ================= UPDATE ================= */
+    public function show($id)
+    {
+        $job = JobOrder::where('id', $id)
+            ->where('admin_or_user_id', Auth::id())
+            ->firstOrFail();
+
+        $jobItems = DB::table('job_items')
+            ->where('job_order_id', $job->id)
+            ->orderBy('id')
+            ->get()
+            ->groupBy('work_type');
+
+        return view(
+            'admin_panel.salesmen.joborder_detail',
+            compact('job', 'jobItems')
+        );
+    }
+
     public function update(Request $request)
     {
         $job = JobOrder::find($request->job_id);
@@ -119,7 +162,6 @@ class JobOrderController extends Controller
         return redirect()->back()->with('success', 'Job Order updated successfully');
     }
 
-    /* ================= DELETE ================= */
     public function delete($id)
     {
         $job = JobOrder::find($id);
@@ -134,7 +176,6 @@ class JobOrderController extends Controller
         return response()->json(['status' => true]);
     }
 
-    /* ================= STATUS TOGGLE ================= */
     public function toggleStatus(Request $request)
     {
         $job = JobOrder::find($request->job_id);

@@ -124,8 +124,8 @@
                                     <th>Height</th>
                                     <th>Width</th>
                                     <th>Opening Stock</th>
-                                    <th>Closing Stock</th>
                                     <th>Used Stock</th>
+                                    <th>Closing Stock</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -148,12 +148,12 @@
                                     </td>
                                     <td><input type="text" class="form-control bg-light height-input" readonly></td>
                                     <td><input type="text" class="form-control bg-light width-input" readonly></td>
-                                    <td><input type="number" class="form-control current-stock"
-                                            name="products[0][current_stock]" min="0" required></td>
-                                    <td><input type="number" class="form-control close-stock"
-                                            name="products[0][close_stock]" min="0" required></td>
+                                    <td><input type="number" class="form-control opening-stock"
+                                            name="products[0][current_stock]" min="0" readonly></td>
+                                    <td><input type="number" class="form-control used-stock"
+                                            name="products[0][used_stock]" min="0" placeholder="" required></td>
                                     <td><input type="text"
-                                            class="form-control bg-light total-display fw-bold text-danger" readonly
+                                            class="form-control bg-light closing-stock fw-bold text-success" readonly
                                             value="0"></td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-sm remove-row" disabled>
@@ -166,7 +166,7 @@
                     </div>
 
                     <div class="alert alert-info">
-                        <strong>Grand Total Stock:</strong> <span id="grandTotal" class="fs-5 text-danger">0</span>
+                        <strong>Total Closing Stock:</strong> <span id="grandTotal" class="fs-5 text-success">0</span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -188,9 +188,8 @@
             $('#add_customer_name').val(selected.data('customer') || '-');
         });
 
+        // When product is selected, auto-fill opening stock
         $(document).on('change', '.product-select', function () {
-            console.log('Product changed!');
-
             let selected = $(this).find('option:selected');
             let row = $(this).closest('tr');
 
@@ -198,64 +197,69 @@
             let width = selected.attr('data-width');
             let stock = selected.attr('data-stock');
 
-            console.log('Height:', height);
-            console.log('Width:', width);
-            console.log('Stock:', stock);
-
             row.find('.height-input').val(height || '-');
             row.find('.width-input').val(width || '-');
-            row.find('.current-stock').val(stock || 0);
+            row.find('.opening-stock').val(stock || 0);
 
-            let closeStock = parseInt(row.find('.close-stock').val()) || 0;
-            if (closeStock > 0) {
-                let total = (parseInt(stock) || 0) - closeStock;
-                row.find('.total-display').val(total);
-                calculateGrandTotal();
-            }
+            // Reset used and closing
+            row.find('.used-stock').val('');
+            row.find('.closing-stock').val(stock || 0);
         });
 
-        $(document).on('input', '.current-stock, .close-stock', function () {
+        // ✅ Calculate: Opening - Used = Closing
+        $(document).on('input', '.used-stock', function () {
             let row = $(this).closest('tr');
-            let current = parseInt(row.find('.current-stock').val()) || 0;
-            let close = parseInt(row.find('.close-stock').val()) || 0;
-            let total = current - close;
-            row.find('.total-display').val(total);
+            let opening = parseFloat(row.find('.opening-stock').val()) || 0;
+            let used = parseFloat(row.find('.used-stock').val()) || 0;
+
+            let closing = opening - used;
+
+            // Prevent negative closing stock
+            if (closing < 0) {
+                row.find('.closing-stock').val(0).addClass('text-danger');
+                alert('Used stock cannot exceed opening stock!');
+                $(this).val(opening);
+                closing = 0;
+            } else {
+                row.find('.closing-stock').val(closing).removeClass('text-danger');
+            }
+
             calculateGrandTotal();
 
+            // Auto-add new row if this is the last row and all fields are filled
             let isLastRow = row.is('#productTableBody tr:last');
             let hasProduct = row.find('.product-select').val() != '';
-            let hasCurrentStock = row.find('.current-stock').val() != '';
-            let hasCloseStock = row.find('.close-stock').val() != '';
+            let hasUsedStock = row.find('.used-stock').val() != '';
 
-            if (isLastRow && hasProduct && hasCurrentStock && hasCloseStock) {
+            if (isLastRow && hasProduct && hasUsedStock) {
                 addNewRow();
             }
         });
 
         function addNewRow() {
             let newRow = `
-                <tr class="product-row">
-                    <td>
-                        <select class="form-control product-select" style="min-width: 150px;" name="products[${rowIndex}][product_id]" required>
-                            <option value="">Select Product</option>
-                            @foreach($products as $product)
-                                <option value="{{ $product->id }}"
-                                    data-height="{{ $product->height ?? '' }}"
-                                    data-width="{{ $product->width ?? '' }}"
-                                    data-stock="{{ $product->initial_stock ?? 0 }}">
-                                    {{ $product->item_name }} @if($product->initial_stock) (Stock: {{ $product->initial_stock }}) @endif
-                                </option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control bg-light height-input" readonly></td>
-                    <td><input type="text" class="form-control bg-light width-input" readonly></td>
-                    <td><input type="number" class="form-control current-stock" name="products[${rowIndex}][current_stock]" min="0" required></td>
-                    <td><input type="number" class="form-control close-stock" name="products[${rowIndex}][close_stock]" min="0" required></td>
-                    <td><input type="text" class="form-control bg-light total-display fw-bold text-danger" readonly value="0"></td>
-                    <td><button type="button" class="btn btn-danger btn-sm remove-row">Delete</button></td>
-                </tr>
-            `;
+            <tr class="product-row">
+                <td>
+                    <select class="form-control product-select" style="min-width: 150px;" name="products[${rowIndex}][product_id]" required>
+                        <option value="">Select Product</option>
+                        @foreach($products as $product)
+                            <option value="{{ $product->id }}"
+                                data-height="{{ $product->height ?? '' }}"
+                                data-width="{{ $product->width ?? '' }}"
+                                data-stock="{{ $product->initial_stock ?? 0 }}">
+                                {{ $product->item_name }} @if($product->initial_stock) (Stock: {{ $product->initial_stock }}) @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </td>
+                <td><input type="text" class="form-control bg-light height-input" readonly></td>
+                <td><input type="text" class="form-control bg-light width-input" readonly></td>
+                <td><input type="number" class="form-control opening-stock" name="products[${rowIndex}][current_stock]" min="0" readonly></td>
+                <td><input type="number" class="form-control used-stock" name="products[${rowIndex}][used_stock]" min="0" placeholder="Enter used stock" required></td>
+                <td><input type="text" class="form-control bg-light closing-stock fw-bold text-success" readonly value="0"></td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-row">Delete</button></td>
+            </tr>
+        `;
             $('#productTableBody').append(newRow);
             rowIndex++;
             updateRemoveButtons();
@@ -264,8 +268,8 @@
         function calculateGrandTotal() {
             let grandTotal = 0;
             $('#productTableBody tr').each(function () {
-                let total = parseInt($(this).find('.total-display').val()) || 0;
-                grandTotal += total;
+                let closing = parseFloat($(this).find('.closing-stock').val()) || 0;
+                grandTotal += closing;
             });
             $('#grandTotal').text(grandTotal);
         }
@@ -284,41 +288,42 @@
                 $('.remove-row').prop('disabled', false);
             }
         }
+    });
+</script>
 
-        $(document).on("click", ".deleteJobStockOutBtn", function (e) {
-            e.preventDefault();
-            let jobId = $(this).data("id");
-            let deleteUrl = "{{ route('delete-job-stockout') }}";
 
-            Swal.fire({
-                title: "Are you sure?",
-                text: "This will delete all stock out records for this job!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: deleteUrl,
-                        type: "POST",
-                        data: {
-                            _method: 'DELETE',
-                            job_id: jobId,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function (response) {
-                            Swal.fire("Deleted!", response.success, "success")
-                                .then(() => location.reload());
-                        },
-                        error: function (xhr) {
-                            console.error('Delete error:', xhr);
-                            Swal.fire("Error!", "Something went wrong!", "error");
-                        }
-                    });
-                }
-            });
+<script>
+    $(document).on("click", ".deleteJobStockOutBtn", function (e) {
+        e.preventDefault();
+        let saleId = $(this).data("id");
+        let deleteUrl = "{{ route('delete-job-stockout') }}"; // Route create karna hoga
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will delete all stock out records for this job!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: deleteUrl,
+                    type: "DELETE",
+                    data: {
+                        sale_id: saleId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function (response) {
+                        Swal.fire("Deleted!", response.success, "success")
+                            .then(() => location.reload());
+                    },
+                    error: function (xhr) {
+                        Swal.fire("Error!", "Something went wrong!", "error");
+                    }
+                });
+            }
         });
     });
 </script>

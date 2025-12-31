@@ -32,8 +32,6 @@
                                     <th>Designation</th>
                                     <th>Name</th>
                                     <th>Phone</th>
-                                    <th>City</th>
-                                    <th>Area</th>
                                     <th>Address</th>
                                     <th>Salary</th>
                                     <th>Status</th>
@@ -47,8 +45,6 @@
                                         <td>{{ $salesman->designation }}</td>
                                         <td>{{ $salesman->name }}</td>
                                         <td>{{ $salesman->phone }}</td>
-                                        <td>{{ $salesman->city }}</td>
-                                        <td>{{ $salesman->area }}</td>
                                         <td>{{ $salesman->address }}</td>
                                         <td>{{ number_format($salesman->salary) }}</td>
                                         <td>
@@ -106,27 +102,6 @@
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone</label>
                             <input type="text" class="form-control" name="phone" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- City -->
-                        <div class="col-md-6 mb-3">
-                            <label for="citySelect" class="form-label">City</label>
-                            <select class="form-control" name="city" id="citySelect" required>
-                                <option value="">Select City</option>
-                                @foreach($cities as $city)
-                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Area -->
-                        <div class="col-md-6 mb-3">
-                            <label for="areasSelect" class="form-label">Area</label>
-                            <select class="form-control" name="area" id="areasSelect" required>
-                                <option value="">Select Areas</option>
-                            </select>
                         </div>
                     </div>
 
@@ -214,27 +189,6 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_phone" class="form-label">Phone</label>
                             <input type="text" class="form-control" id="edit_phone" name="phone" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- City -->
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_city" class="form-label">City</label>
-                            <select class="form-control" name="city" id="edit_city" required>
-                                <option value="">Select City</option>
-                                @foreach($cities as $city)
-                                    <option value="{{ $city->city_name }}">{{ $city->city_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Area -->
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_area" class="form-label">Area</label>
-                            <select class="form-control" name="area" id="edit_area" required>
-                                <option value="">Select Area</option>
-                            </select>
                         </div>
                     </div>
 

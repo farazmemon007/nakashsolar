@@ -1,34 +1,65 @@
 @include('admin_panel.include.header_include')
 
 <style>
-    .readonly-box {
-        background: #f1f3f5;
-        font-weight: 600;
-    }
-
-    .table td,
-    .table th {
-        vertical-align: middle;
-    }
-
     .qty-box {
         display: flex;
-        gap: 4px
+        gap: 4px;
+        align-items: center;
     }
 
-    /* responsive safety */
-    .page-wrapper,
-    .content {
-        width: 100%;
-        overflow-x: hidden
+    .qty-box .qty {
+        max-width: 60px;
     }
 
+    .sale-table th:nth-child(1) {
+        width: 20%;
+    }
 
+    .sale-table th:nth-child(2) {
+        width: 8%;
+    }
 
-    @media(max-width:992px) {
-        .qty-box {
-            flex-direction: column
-        }
+    .sale-table th:nth-child(3) {
+        width: 8%;
+    }
+
+    .sale-table th:nth-child(4) {
+        width: 8%;
+    }
+
+    .sale-table th:nth-child(5) {
+        width: 10%;
+    }
+
+    .sale-table th:nth-child(6) {
+        width: 10%;
+    }
+
+    .sale-table th:nth-child(7) {
+        width: 12%;
+    }
+
+    .sale-table th:nth-child(8) {
+        width: 12%;
+    }
+
+    .sale-table th:nth-child(9) {
+        width: 12%;
+    }
+
+    .sale-table input {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+
+    .sale-table select {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+
+    .sale-table .btn-sm {
+        padding: 4px 8px;
+        font-size: 14px;
     }
 </style>
 
@@ -44,7 +75,6 @@
             <form method="POST" action="{{ route('store-local-sale') }}">
                 @csrf
 
-                {{-- ================= PARTY ================= --}}
                 <div class="container-fluid">
                     <div class="card mb-3">
                         <div class="card-body">
@@ -85,44 +115,40 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-3 readonly-wrap">
+                                <div class="col-md-6 readonly-wrap">
                                     <label>Phone</label>
                                     <input id="phone" class="form-control readonly-box" readonly>
                                 </div>
 
-                                <div class="col-md-3 readonly-wrap">
+                                <div class="col-md-6 readonly-wrap">
                                     <label>Address</label>
                                     <input id="address" class="form-control readonly-box" readonly>
                                 </div>
 
-                                <!-- WALK-IN (same grid size, same place) -->
-                                <div class="col-md-3 d-none" id="walkinName">
+                                <div class="col-md-6 d-none" id="walkinName">
                                     <label>Name</label>
                                     <input name="walkin_name" class="form-control">
                                 </div>
 
-                                <div class="col-md-3 d-none" id="walkinPhone">
+                                <div class="col-md-6 d-none" id="walkinPhone">
                                     <label>Phone</label>
                                     <input name="walkin_phone" class="form-control">
                                 </div>
 
-                                <div class="col-md-3 d-none" id="walkinAddress">
+                                <div class="col-md-6 d-none" id="walkinAddress">
                                     <label>Address</label>
                                     <input name="walkin_address" class="form-control">
                                 </div>
 
                             </div>
-
                         </div>
                     </div>
                 </div>
 
-                {{-- ================= ITEMS ================= --}}
                 <div class="card mb-3">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-
-                            <table class="table table-bordered text-center mb-0">
+                            <table class="table table-bordered text-center mb-0 sale-table">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Item</th>
@@ -133,29 +159,23 @@
                                         <th>Rate</th>
                                         <th>Qty</th>
                                         <th>Total</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody id="saleTableBody">
                                     <tr class="sale-row">
-
                                         <td><input name="item_name[]" class="form-control"></td>
-
                                         <td><input name="height[]" class="form-control height"></td>
-
                                         <td><input name="width[]" class="form-control width"></td>
-
                                         <td>
                                             <select name="unit[]" class="form-control unit">
                                                 <option value="ft" selected>Feet</option>
                                                 <option value="inch">Inch</option>
                                             </select>
                                         </td>
-
                                         <td><input class="form-control area readonly-box" readonly></td>
-
                                         <td><input name="rate[]" class="form-control rate"></td>
-
                                         <td>
                                             <div class="qty-box">
                                                 <button type="button"
@@ -165,28 +185,22 @@
                                                     class="btn btn-sm btn-secondary qty-plus">+</button>
                                             </div>
                                         </td>
-
                                         <td><input name="amount[]" class="form-control item-total readonly-box"
                                                 readonly></td>
-
                                         <td>
                                             <button type="button" class="btn btn-success btn-sm add-row">+</button>
                                             <button type="button" class="btn btn-danger btn-sm remove-row">×</button>
                                         </td>
-
                                     </tr>
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                 </div>
 
-                {{-- ================= TOTAL ================= --}}
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="row g-3">
-
                             <div class="col-md-3">
                                 <label>Gross Total</label>
                                 <input id="grandTotal" class="form-control readonly-box" readonly>
@@ -206,18 +220,17 @@
                                 <label>Remaining</label>
                                 <input id="remaining" class="form-control readonly-box" readonly>
                             </div>
-
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" name="net_amount" id="netAmount">
-                <button class="btn btn-success">Save Job Order</button>
-
+                <button class="btn btn-primary">Save Job Order</button>
             </form>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @if(session('success'))
     <script>
@@ -251,27 +264,16 @@
     </script>
 @endif
 
-
 @include('admin_panel.include.footer_include')
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Add these two libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <script>
-    /* PARTY SWITCH */
     $('#partyType').on('change', function () {
         let t = this.value;
 
-        // hide all
         $('#customerBox,#vendorBox').addClass('d-none');
         $('#walkinName,#walkinPhone,#walkinAddress').addClass('d-none');
         $('.readonly-wrap').addClass('d-none');
 
-        // reset payment fields
         $('#advance').prop('readonly', false);
         $('#remaining').closest('.col-md-3').removeClass('d-none');
 
@@ -287,8 +289,6 @@
 
         if (t === 'walkin') {
             $('#walkinName,#walkinPhone,#walkinAddress').removeClass('d-none');
-
-            // ✅ WALK-IN RULE
             $('#advance').val($('#grandTotal').val()).prop('readonly', true);
             $('#remaining').val('0');
             $('#remaining').closest('.col-md-3').addClass('d-none');
@@ -299,20 +299,18 @@
 
     $('#partyType').trigger('change');
 
-
-    /* AUTO FILL */
     $('#customer').on('change', function () {
         let o = $('option:selected', this);
         $('#phone').val(o.data('phone') || '');
         $('#address').val(o.data('address') || '');
     });
+
     $('#vendor').on('change', function () {
         let o = $('option:selected', this);
         $('#phone').val(o.data('phone') || '');
         $('#address').val(o.data('address') || '');
     });
 
-    /* SIZE PARSER */
     function toFeet(value, unit) {
         if (!value) return 0;
 
@@ -322,43 +320,27 @@
         let whole = parseInt(parts[0]) || 0;
         let decimal = parts[1] ? parseInt(parts[1]) : 0;
 
-        // ===== FEET SELECTED =====
         if (unit === 'ft') {
-            // decimal = inches
             return whole + (decimal / 12);
         }
 
-        // ===== INCH SELECTED =====
-        // decimal = millimeter
         let inches = whole + (decimal / 25.4);
         return inches / 12;
     }
 
-
-
-
-    /* CALC */
     function calcRow(r) {
-
-        let unit = r.find('.unit').val(); // ft | inch
-
+        let unit = r.find('.unit').val();
         let h = toFeet(r.find('.height').val(), unit);
         let w = toFeet(r.find('.width').val(), unit);
-
         let rate = parseFloat(r.find('.rate').val()) || 0;
         let qty = parseFloat(r.find('.qty').val()) || 1;
 
         let area = h * w;
-
-        // FINAL AREA (AS REQUIRED)
         r.find('.area').val(area ? area.toFixed(2) : '');
-
         r.find('.item-total').val((area * rate * qty).toFixed(2));
 
         calcGrand();
     }
-
-
 
     $(document).on('input change', '.height,.width,.unit,.rate,.qty', e => {
         calcRow($(e.target).closest('tr'));
@@ -369,19 +351,20 @@
         r.find('.qty').val(+r.find('.qty').val() + 1);
         calcRow(r);
     });
+
     $(document).on('click', '.qty-minus', e => {
         let r = $(e.target).closest('tr');
         r.find('.qty').val(Math.max(1, +r.find('.qty').val() - 1));
         calcRow(r);
     });
 
-    /* ROWS */
     $('.add-row').click(() => {
         let r = $('.sale-row:first').clone();
         r.find('input').val('');
         r.find('.qty').val(1);
         $('#saleTableBody').append(r);
     });
+
     $(document).on('click', '.remove-row', e => {
         if ($('.sale-row').length > 1) {
             $(e.target).closest('tr').remove();
@@ -389,7 +372,6 @@
         }
     });
 
-    /* GRAND */
     function calcGrand() {
         let g = 0;
         $('.item-total').each((_, e) => g += +e.value || 0);
@@ -400,6 +382,7 @@
         let adv = +$('#advance').val() || 0;
         $('#remaining').val((net - adv).toFixed(2));
     }
+
     $('#advance,[name="gross_discount"]').on('input', calcGrand);
 
     $('form').on('submit', function () {
@@ -410,5 +393,4 @@
             return false;
         }
     });
-
 </script>

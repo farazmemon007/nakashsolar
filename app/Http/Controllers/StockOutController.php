@@ -49,7 +49,7 @@ class StockOutController extends Controller
                 'products' => 'required|array',
                 'products.*.product_id' => 'required|exists:products,id',
                 'products.*.current_stock' => 'required|numeric',
-                'products.*.close_stock' => 'required|numeric',
+                'products.*.used_stock' => 'required|numeric', // Changed from close_stock to used_stock
             ]);
 
             foreach ($request->products as $product) {
@@ -58,27 +58,29 @@ class StockOutController extends Controller
                     continue;
                 }
 
-                $currentStock = floatval($product['current_stock']);
-                $closeStock = floatval($product['close_stock']);
-                $usedStock = $currentStock - $closeStock;
+                $openingStock = floatval($product['current_stock']);
+                $usedStock = floatval($product['used_stock']);
+
+                // ✅ CORRECT FORMULA: Opening - Used = Closing (Remaining)
+                $closingStock = $openingStock - $usedStock;
 
                 // Save stock out record
                 StockOut::create([
                     'admin_or_user_id' => $userId,
                     'product_id' => $product['product_id'],
                     'local_sales_id' => $request->local_sales_id,
-                    'current_stock' => $currentStock,
-                    'close_stock' => $closeStock,
-                    'total_stock' => $usedStock,
+                    'current_stock' => $openingStock,    // Opening Stock
+                    'close_stock' => $closingStock,      // Closing Stock (Remaining)
+                    'total_stock' => $usedStock,         // Used Stock
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);
 
-                // Update product's initial_stock with closing stock (NOT used stock)
+                // ✅ Update product's initial_stock with CLOSING stock (remaining stock)
                 $productModel = Product::find($product['product_id']);
                 if ($productModel) {
-                    // The closing stock becomes the new initial stock for next time
-                    $productModel->initial_stock = $closeStock;
+                    // Closing stock becomes the new opening stock for next time
+                    $productModel->initial_stock = $closingStock;
                     $productModel->save();
                 }
             }
@@ -115,15 +117,19 @@ class StockOutController extends Controller
 
     public function delete_stockout(Request $request)
     {
-        $stockout = StockOut::find($request->id);
+        $saleId = $request->sale_id; // 👈 JS se yehi aa rahi hai
 
-        if ($stockout) {
-            $stockout->delete();
+        $deleted = StockOut::where('local_sales_id', $saleId)->delete();
 
-            return response()->json(['success' => 'StockOut deleted successfully']);
+        if ($deleted) {
+            return response()->json([
+                'success' => 'StockOut deleted successfully',
+            ]);
         }
 
-        return response()->json(['error' => 'StockOut not found'], 404);
+        return response()->json([
+            'error' => 'StockOut not found',
+        ], 404);
     }
 
     public function stockout_details($jobId)

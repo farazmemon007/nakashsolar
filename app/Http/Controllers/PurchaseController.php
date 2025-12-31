@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\Stock;
 use App\Models\SubCategory;
 use App\Models\Vendor;
 use App\Models\VendorLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class PurchaseController extends Controller
 {
@@ -59,182 +59,124 @@ class PurchaseController extends Controller
 
     public function store_Purchase(Request $request)
     {
-        // basic validation for header fields
+        // ================= VALIDATION =================
         $request->validate([
             'purchase_date' => 'required|date',
             'party_code' => 'required',
             'party_name' => 'required',
-            'grand_total' => 'required|numeric',
+            'grand_total' => 'required|numeric|min:0',
         ]);
 
         $userId = Auth::id();
         $invoiceNo = Purchase::generateInvoiceNo();
 
-        // RAW arrays from request (they may contain many blank rows)
-        $item_names = $request->input('item_name', []);
-        $rates = $request->input('rate', []);
-        $product_modes = $request->input('product_mode', []);
-        $measurements = $request->input('pcs', []);
-        $discounts = $request->input('discount', []);
-        $amounts = $request->input('amount', []);
-        $gross_totals = $request->input('gross_total', []);
-        $pcs_carton = $request->input('pcs_carton', []);
+        // ================= ITEMS (FILTER EMPTY ROWS) =================
+        $item_names = $request->item_name ?? [];
+        $rates = $request->rate ?? [];
+        $cartons = $request->product_mode ?? [];
+        $pcs = $request->pcs ?? [];
+        $discounts = $request->discount ?? [];
+        $amounts = $request->amount ?? [];
+        $pcs_carton = $request->pcs_carton ?? [];
 
-        // Build only filled rows array
         $rows = [];
-        $totalRows = max(
-            count($item_names), count($rates), count($product_modes),
-            count($measurements), count($amounts), count($gross_totals), count($pcs_carton)
-        );
 
-        for ($i = 0; $i < $totalRows; $i++) {
-            $name = trim($item_names[$i] ?? '');
-            $rate = $rates[$i] ?? null;
-            $carton = $product_modes[$i] ?? null;
-            $pcs = $measurements[$i] ?? null;
-            $amount = $amounts[$i] ?? null;
-            $gross = $gross_totals[$i] ?? null;
-            $pcs_in_cart = $pcs_carton[$i] ?? null;
-
-            // Consider a row "filled" if it has item name OR rate OR carton qty OR pcs
-            if ($name !== '' || (float) $rate > 0 || (float) $carton > 0 || (float) $pcs > 0) {
+        foreach ($item_names as $i => $name) {
+            if (
+                trim($name) !== '' ||
+                ($rates[$i] ?? 0) > 0 ||
+                ($cartons[$i] ?? 0) > 0 ||
+                ($pcs[$i] ?? 0) > 0
+            ) {
                 $rows[] = [
                     'item_name' => $name,
-                    'rate' => $rate,
-                    'product_mode' => $carton,
-                    'pcs' => $pcs,
-                    'gross_total' => $gross,
+                    'rate' => $rates[$i] ?? 0,
+                    'product_mode' => $cartons[$i] ?? 0,
+                    'pcs' => $pcs[$i] ?? 0,
                     'discount' => $discounts[$i] ?? 0,
-                    'amount' => $amount,
-                    'pcs_carton' => $pcs_in_cart,
+                    'amount' => $amounts[$i] ?? 0,
+                    'pcs_carton' => $pcs_carton[$i] ?? 0,
                 ];
             }
         }
 
-        // If no rows filled -> error
         if (count($rows) === 0) {
-            return back()
-                ->withInput()
-                ->withErrors(['items' => 'Please add at least one product/row before submitting.']);
+            return back()->withErrors(['items' => 'At least one item is required']);
         }
 
-        // Validate each filled row (you can expand rules per field)
-        $rowRules = [
-            'item_name' => 'required|string',
-            'rate' => 'nullable|numeric',
-            'product_mode' => 'nullable',
-            'pcs' => 'nullable|numeric',
-            'amount' => 'required|numeric',
-            'pcs_carton' => 'nullable|numeric',
-        ];
-
-        $rowErrors = [];
-        foreach ($rows as $index => $r) {
-            $validator = Validator::make($r, $rowRules);
-            if ($validator->fails()) {
-                $rowErrors["row_{$index}"] = $validator->errors()->all();
-            }
-        }
-
-        if (! empty($rowErrors)) {
-            // Flatten errors and return
-            $flat = [];
-            foreach ($rowErrors as $k => $errs) {
-                foreach ($errs as $e) {
-                    $flat[] = 'Row '.(intval(substr($k, 4)) + 1).': '.$e;
-                }
-            }
-
-            return back()->withInput()->withErrors($flat);
-        }
-
-        // Prepare arrays for DB storage (only filled rows)
-        $items_arr = array_column($rows, 'item_name');
-        $rates_arr = array_map(function ($r) {
-            return $r['rate'] ?? 0;
-        }, $rows);
-        $carton_arr = array_map(function ($r) {
-            return $r['product_mode'] ?? 0;
-        }, $rows);
-        $measurement2 = array_map(function ($r) {
-            return $r['measurement'] ?? 0;
-        }, $rows);
-        $gross_arr = array_map(function ($r) {
-            return $r['gross_total'] ?? 0;
-        }, $rows);
-        $discount_arr = array_map(function ($r) {
-            return $r['discount'] ?? 0;
-        }, $rows);
-        $amount_arr = array_map(function ($r) {
-            return $r['amount'] ?? 0;
-        }, $rows);
-        $pcs_carton_arr = array_map(function ($r) {
-            return $r['pcs_carton'] ?? 0;
-        }, $rows);
-
-        // Save purchase
-        $purchaseData = [
+        // ================= SAVE PURCHASE =================
+        $purchase = Purchase::create([
             'admin_or_user_id' => $userId,
             'invoice_number' => $invoiceNo,
             'purchase_date' => $request->purchase_date,
             'party_code' => $request->party_code,
             'party_name' => $request->party_name,
-            'item' => json_encode($items_arr),
-            'size' => json_encode([]),
-            'rate' => json_encode($rates_arr),
-            'product_mode' => json_encode($carton_arr),
-            'measurement' => json_encode($measurement2),
-            'gross_total' => json_encode($gross_arr),
-            'discount' => json_encode($discount_arr),
-            'amount' => json_encode($amount_arr),
-            'pcs_carton' => json_encode($pcs_carton_arr),
+            'item' => json_encode(array_column($rows, 'item_name')),
+            'rate' => json_encode(array_column($rows, 'rate')),
+            'product_mode' => json_encode(array_column($rows, 'product_mode')),
+            'measurement' => json_encode(array_column($rows, 'pcs')),
+            'discount' => json_encode(array_column($rows, 'discount')),
+            'amount' => json_encode(array_column($rows, 'amount')),
+            'pcs_carton' => json_encode(array_column($rows, 'pcs_carton')),
             'grand_total' => $request->grand_total,
-        ];
+        ]);
 
-        $purchase = Purchase::create($purchaseData);
+        // ================= UPDATE PRODUCT STOCK =================
+        foreach ($rows as $row) {
 
-        // Update product stock & price using item_name (if product exists)
-        foreach ($rows as $r) {
-            $itemName = $r['item_name'];
-            if (! $itemName) {
-                continue;
-            }
-            $product = Product::where('item_name', $itemName)->first();
+            $product = Product::where('item_name', $row['item_name'])->first();
             if (! $product) {
                 continue;
             }
 
-            $product_mode = (float) ($r['product_mode'] ?? 0);
-            $pcs = (float) ($r['pcs'] ?? 0);
-            $rate = (float) ($r['rate'] ?? 0);
+            $cartonQty = (float) $row['product_mode'];
+            $pcsQty = (float) $row['pcs'];
+            $rate = (float) $row['rate'];
+            $pcsInCarton = (float) $product->pcs_in_carton;
 
-            $pcs_in_carton = (float) ($product->pcs_in_carton ?? 0);
-            $previous_cartons = (float) ($product->carton_quantity ?? 0);
-            $previous_stock = (float) ($product->initial_stock ?? 0);
-
-            $product->carton_quantity = $previous_cartons + $product_mode;
-            $product->initial_stock = $previous_stock + ($product_mode * $pcs_in_carton) + $pcs;
+            $product->carton_quantity += $cartonQty;
+            $product->initial_stock += ($cartonQty * $pcsInCarton) + $pcsQty;
             $product->wholesale_price = $rate;
             $product->save();
         }
 
-        // Update vendor ledger
-        $previousBalance = VendorLedger::where('vendor_id', $request->party_name)
-            ->value('closing_balance') ?? 0;
-        $newPreviousBalance = $request->grand_total;
-        $newClosingBalance = $previousBalance + $request->grand_total;
+        // ================= VENDOR LEDGER (FINAL & CORRECT) =================
+        $ledger = VendorLedger::where('vendor_id', $request->party_name)->first();
 
-        VendorLedger::updateOrCreate(
-            ['vendor_id' => $request->party_name],
-            [
-                'vendor_id' => $request->party_name,
+        $currentAmount = $request->grand_total;
+
+        if ($ledger) {
+
+            // ✅ previous = last closing
+            $previousBalance = $ledger->closing_balance;
+
+            $closingBalance = $previousBalance + $currentAmount;
+
+            $ledger->update([
+                'previous_balance' => $previousBalance,
+                'closing_balance' => $closingBalance,
+            ]);
+
+        } else {
+
+            // ✅ First time vendor
+            $openingBalance = 0; // agar vendor table me opening ho to wahan se lao
+            $previousBalance = $openingBalance;
+            $closingBalance = $openingBalance + $currentAmount;
+
+            VendorLedger::create([
                 'admin_or_user_id' => $userId,
-                'previous_balance' => $newPreviousBalance,
-                'closing_balance' => $newClosingBalance,
-            ]
-        );
+                'vendor_id' => $request->party_name,
+                'opening_balance' => $openingBalance,
+                'previous_balance' => $previousBalance,
+                'closing_balance' => $closingBalance,
+            ]);
+        }
 
-        return redirect()->route('purchase.invoice', $purchase->id)->with('success', 'Purchase saved successfully and stock updated!');
+        // ================= REDIRECT =================
+        return redirect()
+            ->route('purchase.invoice', $purchase->id)
+            ->with('success', 'Purchase saved & ledger updated successfully');
     }
 
     public function all_Purchases()
@@ -259,12 +201,31 @@ class PurchaseController extends Controller
 
     public function purchaseInvoice($id)
     {
-        $purchase = Purchase::findOrFail($id);
-        $purchase->gross_total_sum = array_sum(json_decode($purchase->amount));
-        $purchase->discount_total_sum = array_sum(json_decode($purchase->discount));
-        $purchase->grand_total = $purchase->gross_total_sum - $purchase->discount_total_sum;
+        $purchase = Purchase::with('vendor')->findOrFail($id);
 
-        return view('admin_panel.purchase.invoice', compact('purchase'));
+        $amounts = json_decode($purchase->amount, true) ?? [];
+        $discounts = json_decode($purchase->discount, true) ?? [];
+
+        $grossTotal = array_sum($amounts);
+        $discountTotal = array_sum($discounts);
+        $netTotal = $grossTotal - $discountTotal;
+
+        // ✅ Ledger se DIRECT uthao
+        $ledger = VendorLedger::where('vendor_id', $purchase->party_name)->first();
+
+        $openingBalance = $ledger->opening_balance ?? 0;
+        $previousBalance = $ledger->previous_balance ?? 0;
+        $closingBalance = $ledger->closing_balance ?? 0;
+
+        return view('admin_panel.purchase.invoice', compact(
+            'purchase',
+            'grossTotal',
+            'discountTotal',
+            'netTotal',
+            'openingBalance',
+            'previousBalance',
+            'closingBalance'
+        ));
     }
 
     public function purchaseedit($id)

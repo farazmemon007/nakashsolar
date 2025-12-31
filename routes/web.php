@@ -108,7 +108,7 @@ Route::get('/stockout', [StockOutController::class, 'stockout'])->name('stockout
 Route::post('/store-stockout', [StockOutController::class, 'store_stockout'])->name('store-stockout');
 Route::post('/update-stockout', [StockOutController::class, 'update_stockout'])->name('update-stockout');
 Route::delete('/delete-stockout', [StockOutController::class, 'delete_stockout'])->name('delete-stockout');
-Route::delete('/delete-job-stockout', [StockOutController::class, 'delete_job_stockout'])->name('delete-job-stockout');
+Route::delete('/delete-job-stockout', [StockOutController::class, 'delete_stockout'])->name('delete-job-stockout');
 Route::get('/stockout-details/{jobId}', [StockOutController::class, 'stockout_details'])->name('stockout-details');
 
 // Product
@@ -165,6 +165,7 @@ Route::get('/job-orders/get-sale-details/{id}', [JobOrderController::class, 'get
 
 Route::post('/job-orders/store', [JobOrderController::class, 'store'])->name('job-orders.store');
 Route::post('/job-orders/update', [JobOrderController::class, 'update'])->name('job-orders.update');
+Route::get('/job-orders/{id}', [JobOrderController::class, 'show'])->name('job-orders.show');
 Route::delete('/job-orders/delete/{id}', [JobOrderController::class, 'delete'])->name('job-orders.delete');
 Route::post('/job-orders/status-update', [JobOrderController::class, 'toggleStatus'])->name('job-orders.toggle-status');
 
