@@ -1,19 +1,97 @@
 @include('admin_panel.include.header_include')
 
 <style>
+    /* Simple styles for custom autocomplete dropdown */
+    .autocomplete-list {
+        position: absolute;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #ddd;
+        max-height: 220px;
+        overflow-y: auto;
+        width: 100%;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .autocomplete-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    .autocomplete-item:hover,
+    .autocomplete-item.active {
+        background: #e9ecef;
+    }
+
+    .row-relative {
+        position: relative;
+    }
+
+    /* General Table Styling */
+    #saleTable {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    #saleTable th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        color: #333;
+        border-bottom: 2px solid #dee2e6;
+        padding: 10px 5px !important;
+        font-size: 13px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    #saleTable td {
+        vertical-align: middle;
+        padding: 8px 6px !important;
+    }
+
+    /* Column Widths */
+    #saleTable th:nth-child(1), #saleTable td:nth-child(1) { width: 250px; } /* Item Name */
+    #saleTable th:nth-child(2), #saleTable td:nth-child(2) { width: 100px; } /* Quantity */
+    #saleTable th:nth-child(3), #saleTable td:nth-child(3) { width: 100px; } /* Unit */
+    #saleTable th:nth-child(4), #saleTable td:nth-child(4) { width: 120px; } /* Price/ Unit */
+    #saleTable th:nth-child(5), #saleTable td:nth-child(5) { width: 150px; } /* Amount */
+    #saleTable th:nth-child(6), #saleTable td:nth-child(6) { width: 80px; }  /* Action */
+
+    /* Input & Select Styling */
+    #saleTable .form-control {
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        font-size: 13px;
+        padding: 6px 8px;
+        height: 34px; /* Consistent height */
+        width: 100% !important;
+    }
+
+    #saleTable .form-control:focus {
+        border-color: #637381;
+        box-shadow: none;
+    }
+
+    /* Readonly inputs styling */
     .readonly-box {
-        background: #f1f3f5;
-        font-weight: 600
+        background-color: #f8f9fa !important;
+        color: #6c757d;
+        cursor: default;
     }
 
-    .table td,
-    .table th {
-        vertical-align: middle
+    /* Action Buttons */
+    #saleTable .remove-row {
+        padding: 4px 10px;
+        font-size: 12px;
+        white-space: nowrap;
     }
 
-    .qty-box {
-        display: flex;
-        gap: 4px
+    #saleTable tbody tr:hover {
+        background-color: #f5f5f5;
     }
 </style>
 
@@ -26,71 +104,68 @@
 
             <h4 class="mb-3">✏️ Edit Job Order</h4>
 
-            <form method="POST" action="{{ route('local.sale.update', $original->id) }}">
+            <form method="POST" action="{{ route('local.sale.update', $original->id) }}" id="saleForm">
                 @csrf
                 @method('PUT')
 
-                {{-- ================= PARTY ================= --}}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="row g-3">
+                <div class="container-fluid">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row g-3">
 
-                            @php
-                            // determine party display values
-                            $partyName = '';
-                            $phone = '';
-                            $address = '';
+                                @php
+                                $partyName = '';
+                                $phone = '';
+                                $address = '';
 
-                            if ($original->party_type === 'customer' && $original->customer) {
-                                $partyName = $original->customer->customer_name ?? $original->customer->shop_name;
-                                $phone = $original->customer->phone_number;
-                                $address = $original->customer->address;
-                            } elseif ($original->party_type === 'vendor' && $original->vendor) {
-                                $partyName = $original->vendor->Party_name;
-                                $phone = $original->vendor->Party_phone;
-                                $address = $original->vendor->Party_address;
-                            } else {
-                                // walkin or fallback
-                                $partyName = $original->customer_shopname;
-                                $phone = $original->customer_phone;
-                                $address = $original->customer_address;
-                            }
-                        @endphp
+                                if ($original->party_type === 'customer' && $original->customer) {
+                                    $partyName = $original->customer->customer_name ?? $original->customer->shop_name;
+                                    $phone = $original->customer->phone_number;
+                                    $address = $original->customer->address;
+                                } elseif ($original->party_type === 'vendor' && $original->vendor) {
+                                    $partyName = $original->vendor->Party_name;
+                                    $phone = $original->vendor->Party_phone;
+                                    $address = $original->vendor->Party_address;
+                                } else {
+                                    // walkin or fallback
+                                    $partyName = $original->customer_shopname;
+                                    $phone = $original->customer_phone;
+                                    $address = $original->customer_address;
+                                }
+                                @endphp
 
-                        <input type="hidden" name="party_type" value="{{ $original->party_type }}">
-                        <input type="hidden" name="customer_id" value="{{ $original->customer_id }}">
-                        <input type="hidden" name="vendor_id" value="{{ $original->vendor_id }}">
-                        <input type="hidden" name="walkin_name" value="{{ $original->customer_shopname }}">
+                                <input type="hidden" name="party_type" value="{{ $original->party_type }}">
+                                <input type="hidden" name="customer_id" value="{{ $original->customer_id }}">
+                                <input type="hidden" name="vendor_id" value="{{ $original->vendor_id }}">
+                                <input type="hidden" name="walkin_name" value="{{ $original->customer_shopname }}">
 
-                        <div class="col-md-3">
-                            <label>Party Type</label>
-                            <input class="form-control readonly-box" value="{{ ucfirst($original->party_type) }}" readonly>
-                        </div>
+                                <div class="col-md-3">
+                                    <label>Party Type</label>
+                                    <input class="form-control readonly-box" value="{{ ucfirst($original->party_type) }}" readonly>
+                                </div>
 
-                        <div class="col-md-3">
-                            <label>Party</label>
-                            <input class="form-control readonly-box" value="{{ $partyName }}" readonly>
-                        </div>
+                                <div class="col-md-3">
+                                    <label>Party</label>
+                                    <input class="form-control readonly-box" value="{{ $partyName }}" readonly>
+                                </div>
 
-                        <div class="col-md-3">
-                            <label>Phone</label>
-                            <input class="form-control readonly-box" value="{{ $phone }}" readonly>
-                        </div>
+                                <div class="col-md-3">
+                                    <label>Phone</label>
+                                    <input class="form-control readonly-box" value="{{ $phone }}" readonly>
+                                </div>
 
-                        <div class="col-md-3">
-                            <label>Address</label>
-                            <input class="form-control readonly-box" value="{{ $address }}" readonly>
-                        </div>
+                                <div class="col-md-3">
+                                    <label>Address</label>
+                                    <input class="form-control readonly-box" value="{{ $address }}" readonly>
+                                </div>
 
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- ================= ITEMS ================= --}}
                 @php
                     $items = json_decode($original->item, true) ?? [];
-                    $heights = json_decode($original->height, true) ?? [];
-                    $widths = json_decode($original->width, true) ?? [];
                     $units = json_decode($original->unit, true) ?? [];
                     $rates = json_decode($original->rate, true) ?? [];
                     $qtys = json_decode($original->qty, true) ?? [];
@@ -100,231 +175,295 @@
                 <div class="card mb-3">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-
-                            <table class="table table-bordered text-center mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Item</th>
-                                        <th>H</th>
-                                        <th>W</th>
+                            <table class="table table-bordered align-middle text-center" id="saleTable">
+                                <thead>
+                                    <tr class="bg-light">
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>
                                         <th>Unit</th>
-                                        <th>Area</th>
-                                        <th>Rate</th>
-                                        <th>Qty</th>
-                                        <th>Total</th>
+                                        <th>Price/ Unit</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
 
-                                <tbody id="saleTableBody">
-
+                                <tbody>
                                     @foreach($items as $i => $item)
-                                        @php
-                                            $hVal = $heights[$i] ?? '';
-                                            $wVal = $widths[$i] ?? '';
-                                            // Infer type: if H and W are empty/zero, likely Hardware
-                                            $isHardware = (empty($hVal) && empty($wVal)); 
-                                        @endphp
                                         <tr class="sale-row">
-                                            <td>
-                                                <select class="form-control row-type" style="width: 100px;">
-                                                    <option value="glass" {{ !$isHardware ? 'selected' : '' }}>Glass</option>
-                                                    <option value="hardware" {{ $isHardware ? 'selected' : '' }}>Hardware</option>
-                                                </select>
+                                            <td style="position:relative;">
+                                                <input type="text" class="form-control item-input" name="item_name[]" autocomplete="off" placeholder="Type item name" value="{{ $item }}">
+                                                <div class="autocomplete-list d-none"></div>
                                             </td>
                                             <td>
-                                                <input name="item[]" class="form-control readonly-box" value="{{ $item }}" readonly>
+                                                <input type="number" class="form-control qty text-center" name="qty[]" min="0" value="{{ $qtys[$i] ?? 1 }}">
                                             </td>
-
                                             <td>
-                                                <input name="height[]" class="form-control height" value="{{ $hVal }}" {{ $isHardware ? 'readonly' : '' }}>
+                                                <input type="text" class="form-control unit text-center" name="unit[]" readonly value="{{ $units[$i] ?? '' }}">
                                             </td>
-
                                             <td>
-                                                <input name="width[]" class="form-control width" value="{{ $wVal }}" {{ $isHardware ? 'readonly' : '' }}>
+                                                <input type="number" class="form-control rate text-end" name="rate[]" min="0" value="{{ $rates[$i] ?? 0 }}">
                                             </td>
-
                                             <td>
-                                                <select name="unit[]" class="form-control unit" {{ $isHardware ? 'disabled' : '' }}>
-                                                    <option value="ft" {{ ($units[$i] ?? '') == 'ft' ? 'selected' : '' }}>Feet</option>
-                                                    <option value="inch" {{ ($units[$i] ?? '') == 'inch' ? 'selected' : '' }}>Inch</option>
-                                                </select>
+                                                <input type="number" class="form-control amount text-end" name="amount[]" readonly value="{{ $amounts[$i] ?? 0 }}">
                                             </td>
-
                                             <td>
-                                                <input class="form-control area readonly-box" readonly>
+                                                <button type="button" class="btn btn-danger btn-sm remove-row">Delete</button>
                                             </td>
-
-                                            <td>
-                                                <input name="rate[]" class="form-control rate" value="{{ $rates[$i] ?? 0 }}">
-                                            </td>
-
-                                            <td>
-                                                <div class="qty-box">
-                                                    <button type="button" class="btn btn-sm btn-secondary qty-minus">−</button>
-                                                    <input name="qty[]" class="form-control qty text-center" value="{{ $qtys[$i] ?? 1 }}">
-                                                    <button type="button" class="btn btn-sm btn-secondary qty-plus">+</button>
-                                                </div>
-                                            </td>
-
-                                            <td>
-                                                <input name="amount[]" class="form-control item-total readonly-box" value="{{ $amounts[$i] ?? 0 }}" readonly>
-                                            </td>
-
                                         </tr>
                                     @endforeach
-
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                 </div>
 
-                {{-- ================= TOTAL ================= --}}
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="row g-3">
-
                             <div class="col-md-3">
-                                <label>Grand Total</label>
-                                <input id="grandTotal" name="grand_total" class="form-control readonly-box"
-                                    value="{{ $original->grand_total }}" readonly>
+                                <label>Gross Total</label>
+                                <input id="grandTotal" name="grand_total" class="form-control readonly-box" readonly value="{{ $original->grand_total }}">
                             </div>
 
                             <div class="col-md-3">
                                 <label>Discount</label>
-                                <input name="discount_value" class="form-control"
-                                    value="{{ $original->discount_value }}">
+                                <input name="discount_value" class="form-control discount" value="{{ $original->discount_value }}">
                             </div>
 
                             <div class="col-md-3">
                                 <label>Advance</label>
-                                <input name="advance_amount" class="form-control"
-                                    value="{{ $original->advance_amount }}">
+                                <input id="advance" name="advance_amount" class="form-control advance" value="{{ $original->advance_amount }}">
                             </div>
 
                             <div class="col-md-3">
-                                <label>Net Amount</label>
-                                <input id="netAmount" name="net_amount" class="form-control readonly-box"
-                                    value="{{ $original->net_amount }}" readonly>
+                                <label>Net Amount / Remaining</label>
+                                <input id="netAmount" name="net_amount" class="form-control readonly-box" readonly value="{{ $original->net_amount }}">
                             </div>
-
                         </div>
                     </div>
                 </div>
 
-                <button class="btn btn-primary">Update Sale</button>
-
+                <button class="btn btn-primary" type="submit">Update Job Order</button>
             </form>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: "{{ session('success') }}",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+@endif
+
+@if(session('error'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "{{ session('error') }}"
+        });
+    </script>
+@endif
+
+@if ($errors->any())
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: `{!! implode('<br>', $errors->all()) !!}`
+        });
+    </script>
+@endif
+
 @include('admin_panel.include.footer_include')
 
-{{-- ================= JS ================= --}}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Add these two libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
 <script>
-    function toFeet(value, unit) {
-        if (!value) return 0;
-        value = value.toString().trim();
-        let parts = value.split('.');
-        let whole = parseFloat(parts[0]) || 0;
-        let decimal = parts[1] ? parseFloat(parts[1]) : 0;
+$(document).ready(function () {
 
-        if (unit === 'ft') {
-            return whole + (decimal / 12);
-        }
-        let inches = whole + (decimal / 25.4);
-        return inches / 12;
+    // ========== ROW CREATION ==========
+    function createRowHtml() {
+        return `
+            <tr class="sale-row">
+                <td style="position:relative;">
+                    <input type="text" class="form-control item-input" name="item_name[]" autocomplete="off" placeholder="Type item name">
+                    <div class="autocomplete-list d-none"></div>
+                </td>
+                <td>
+                    <input type="number" class="form-control qty text-center" name="qty[]" min="0">
+                </td>
+                <td>
+                    <input type="text" class="form-control unit text-center" name="unit[]" readonly>
+                </td>
+                <td>
+                    <input type="number" class="form-control rate text-end" name="rate[]" min="0">
+                </td>
+                <td>
+                    <input type="number" class="form-control amount text-end" name="amount[]" readonly>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-row">Delete</button>
+                </td>
+            </tr>`;
     }
 
-    // Toggle Input State based on Type
-    $(document).on('change', '.row-type', function() {
-        let r = $(this).closest('tr');
-        let type = $(this).val();
+    function appendNewRow() {
+        $('#saleTable tbody').append(createRowHtml());
+    }
 
-        if (type === 'hardware') {
-            // Disable Height, Width, Manual Sqft, Unit
-            r.find('.height, .width, .unit').prop('readonly', true).val('').css('background-color', '#f0f0f0');
-            r.find('.unit').prop('disabled', true);
-             // Default Qty to 1 if empty
-             if(!r.find('.qty').val()) r.find('.qty').val(1);
+    // Remove row
+    $(document).on('click', '.remove-row', function () {
+        let rowCount = $('#saleTable tbody tr').length;
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+            calculateGrandTotal();
         } else {
-            // Enable
-            r.find('.height, .width').prop('readonly', false).css('background-color', '');
-            r.find('.unit').prop('disabled', false);
+            Swal.fire('Cannot Delete', 'At least one row must remain.', 'warning');
         }
-        calcRow(r);
     });
 
-    function calcRow(row) {
-        let type = row.find('.row-type').val();
-        let rate = parseFloat(row.find('.rate').val()) || 0;
-        let qty = parseFloat(row.find('.qty').val());
-        if (isNaN(qty) || qty < 0) qty = 1;
+    // ========== AUTOCOMPLETE SEARCH ==========
+    $(document).on('input', '.item-input', function () {
+        let input = $(this);
+        let row = input.closest('tr');
+        let list = row.find('.autocomplete-list');
+        let q = input.val().trim();
 
-        if (type === 'hardware') {
-            // Simple Calculation: Rate * Qty
-            let total = rate * qty;
-            row.find('.item-total').val(total.toFixed(2));
-            row.find('.area').val('-'); // clear area
-        } else {
-             let h = toFeet(row.find('.height').val(), row.find('.unit').val());
-            let w = toFeet(row.find('.width').val(), row.find('.unit').val());
-            
-            let area = h * w;
-            row.find('.area').val(area ? area.toFixed(2) : '');
-            
-            let total = area * rate * qty;
-            row.find('.item-total').val(total.toFixed(2));
+        if (!q) {
+            list.addClass('d-none');
+            return;
         }
 
-        calcGrand();
-    }
+        $.ajax({
+            url: "{{ route('get.items') }}",
+            type: "GET",
+            data: { q: q },
+            success: function (res) {
+                if (!Array.isArray(res) || res.length === 0) {
+                    list.addClass('d-none');
+                    return;
+                }
 
-    function calcGrand() {
-        let total = 0;
-        $('.item-total').each(function () {
-            total += parseFloat(this.value) || 0;
+                list.empty().removeClass('d-none');
+                res.forEach(it => {
+                    let el = $(`<div class="autocomplete-item">${it.item_name}</div>`);
+                    el.data('item', it);
+                    list.append(el);
+                });
+            }
         });
-        $('#grandTotal').val(total.toFixed(2));
-        $('#netAmount').val(total.toFixed(2));
-    }
-
-    $(document).on('input change', '.height,.width,.unit,.rate,.qty', function () {
-        calcRow($(this).closest('tr'));
     });
 
-    $(document).on('click', '.qty-plus', function () {
-        let r = $(this).closest('tr');
-        r.find('.qty').val(+r.find('.qty').val() + 1);
-        calcRow(r);
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.item-input, .autocomplete-list').length) {
+            $('.autocomplete-list').addClass('d-none');
+        }
     });
 
-    $(document).on('click', '.qty-minus', function () {
-        let r = $(this).closest('tr');
-        r.find('.qty').val(Math.max(1, +r.find('.qty').val() - 1));
-        calcRow(r);
-    });
+    $(document).on('click', '.autocomplete-item', function () {
+        let it = $(this).data('item');
+        let row = $(this).closest('tr');
 
-    // 🔥 calculate all rows on load
-    $(document).ready(function () {
-        $('.sale-row').each(function () {
-            // Initialize readonly state based on existing value
-            // Already handled by blade logic but let's re-run calcRow to be sure
-            calcRow($(this));
-        });
+        row.find('.item-input').val(it.item_name);
+
+        let unitVal = it.product_mode || '';
+        if (unitVal === 'measurements') unitVal = 'Sq.ft';
+        else if (unitVal === 'simple') unitVal = 'Pcs';
+        row.find('.unit').val(unitVal);
+
+        row.find('.rate').val(parseInt(it.retail_price) || 0);
         
-        $('form').on('submit', function() {
-              $('.unit').prop('disabled', false);
-        });
+        if (!row.find('.qty').val()) {
+            row.find('.qty').val(1);
+        }
+
+        row.find('.autocomplete-list').addClass('d-none');
+
+        calculateRow(row);
+        autoAddIfNeeded();
     });
+
+    // ========== CALCULATIONS ==========
+    $(document).on('input', '.rate, .qty', function () {
+        let row = $(this).closest('tr');
+        calculateRow(row);
+        autoAddIfNeeded();
+    });
+
+    function calculateRow(row) {
+        let rate = parseFloat(row.find('.rate').val()) || 0;
+        let qty = parseFloat(row.find('.qty').val()) || 0;
+
+        let finalAmount = rate * qty;
+        row.find('.amount').val(finalAmount.toFixed(2));
+
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        let total = 0;
+        $('.amount').each(function () {
+            total += parseFloat($(this).val()) || 0;
+        });
+
+        $('#grandTotal').val(total.toFixed(2));
+
+        let discount = parseFloat($('.discount').val()) || 0;
+        let net = total - discount;
+        
+        // Wait, here "net_amount" means the remaining amount after advance?
+        // Let's use the same logic as the old view
+        let advance = parseFloat($('.advance').val()) || 0;
+        $('#netAmount').val((net - advance).toFixed(2));
+    }
+
+    $('.discount, .advance').on('input', calculateGrandTotal);
+
+    // ========== AUTO ADD ROW WHEN NEEDED ==========
+    function isRowEmpty(row) {
+        let itemName = row.find('.item-input').val().trim();
+        let rate = parseFloat(row.find('.rate').val()) || 0;
+        let qty = parseFloat(row.find('.qty').val()) || 0;
+
+        return !itemName && rate === 0 && qty === 0;
+    }
+
+    function autoAddIfNeeded() {
+        let rows = $('#saleTable tbody tr');
+        let emptyRowExists = false;
+
+        rows.each(function () {
+            if (isRowEmpty($(this))) {
+                emptyRowExists = true;
+                return false;
+            }
+        });
+
+        if (!emptyRowExists) {
+            appendNewRow();
+        }
+    }
+
+    $('#saleForm').on('submit', function(e) {
+        let validItems = 0;
+        $('.item-input').each(function() {
+            if ($(this).val().trim() !== '') validItems++;
+        });
+
+        if (validItems === 0) {
+            e.preventDefault();
+            Swal.fire('Error', 'Please add at least one item.', 'error');
+            return false;
+        }
+    });
+
+    // Make sure at least one empty row exists at the end
+    autoAddIfNeeded();
+});
 </script>
