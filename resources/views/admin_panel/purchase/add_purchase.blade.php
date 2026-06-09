@@ -12,7 +12,8 @@
                 </div>
             </div>
 
-            <div class="card p-4">
+            <!-- ITEMS TABLE -->
+            <div class="card mb-3 shadow-sm border-0">
                 <div class="card-body">
                     @if (session()->has('success'))
                         <div class="alert alert-success">
@@ -386,7 +387,12 @@
         <td class="row-index text-center fw-semibold" style="vertical-align: middle;"></td>
         <td style="position:relative;">
             <input type="hidden" name="item_id[]" class="item-id">
-            <input type="text" class="form-control item-input" name="item_name[]" autocomplete="off" placeholder="Type item name">
+            <div class="input-group input-group-sm">
+                <button type="button" class="btn btn-outline-secondary mode-toggle px-2" title="Toggle Search/Manual" tabindex="-1">
+                    <i class="fas fa-search mode-icon"></i>
+                </button>
+                <input type="text" class="form-control item-input" name="item_name[]" autocomplete="off" placeholder="Search Product" data-mode="search">
+            </div>
             <div class="autocomplete-list d-none"></div>
         </td>
 
@@ -451,17 +457,39 @@
             }
         });
 
-        // ========== AUTOCOMPLETE SEARCH ==========
-        $(document).on('input', '.item-input', function () {
+        // Row Input Mode Toggle
+        $(document).on('click', '.mode-toggle', function() {
+            let btn = $(this);
+            let icon = btn.find('.mode-icon');
+            let input = btn.siblings('.item-input');
+            
+            if (input.attr('data-mode') === 'search') {
+                input.attr('data-mode', 'manual');
+                icon.removeClass('fa-search').addClass('fa-keyboard');
+                btn.removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+                input.attr('placeholder', 'Manual Entry');
+                input.closest('td').find('.autocomplete-list').addClass('d-none');
+            } else {
+                input.attr('data-mode', 'search');
+                icon.removeClass('fa-keyboard').addClass('fa-search');
+                btn.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+                input.attr('placeholder', 'Search Product');
+            }
+            input.focus();
+        });
+
+        // ========== AUTOCOMPLETE LOGIC ==========
+        $(document).on('focus input', '.item-input', function (e) {
             let input = $(this);
             let row = input.closest('tr');
             let list = row.find('.autocomplete-list');
-            let q = input.val().trim();
-
-            if (!q) {
+            
+            if (input.attr('data-mode') === 'manual') {
                 list.addClass('d-none');
                 return;
             }
+
+            let q = input.val().trim();
 
             $.ajax({
                 url: "{{ route('get.items') }}",

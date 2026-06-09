@@ -224,45 +224,8 @@
         $("#edit_product_id").val(id);
         $("#edit_item_name").val(name);
         $("#edit_unit").val(unit);
-            $('#edit_wholesale_simple, #edit_retail_simple').prop('disabled', true).removeAttr('required');
-            // Enable measurement fields (area is readonly but must be enabled to submit)
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price, #edit_area').prop('disabled', false);
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price').attr('required', true);
-
-            calculateEditMeasurement();
-        } else {
-            $('#edit_measurementFields').hide();
-            $('#edit_simpleFields').show();
-
-            $("#edit_wholesale_simple").val(wholesale);
-            $("#edit_retail_simple").val(retail);
-
-            // Enable simple fields
-            $('#edit_wholesale_simple, #edit_retail_simple').prop('disabled', false).attr('required', true);
-            // Disable measurement fields
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price, #edit_area').prop('disabled', true).removeAttr('required');
-        }
-    });
-
-    $('#edit_productMode').on('change', function () {
-        if (this.value === 'measurements') {
-            $('#edit_measurementFields').show();
-            $('#edit_simpleFields').hide();
-            
-            // Disable simple fields
-            $('#edit_wholesale_simple, #edit_retail_simple').prop('disabled', true).removeAttr('required');
-            // Enable measurement fields (area is readonly but must be enabled to submit)
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price, #edit_area').prop('disabled', false);
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price').attr('required', true);
-        } else {
-            $('#edit_measurementFields').hide();
-            $('#edit_simpleFields').show();
-            
-            // Enable simple fields
-            $('#edit_wholesale_simple, #edit_retail_simple').prop('disabled', false).attr('required', true);
-            // Disable measurement fields
-            $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price, #edit_area').prop('disabled', true).removeAttr('required');
-        }
+        $("#edit_wholesale_price").val(wholesale);
+        $("#edit_retail_price").val(retail);
     });
 
 
@@ -304,8 +267,8 @@ $('#edit_height, #edit_width, #edit_wholesale_price, #edit_retail_price').on('in
             success: function(response) {
                 if (response.status === 'success') {
                     // Add new option to unit dropdowns
-                    let newOption = new Option(response.unit.name, response.unit.name, false, true);
-                    $('.unitDropdown').append(newOption).trigger('change');
+                    let newOptionHTML = `<option value="${response.unit.name}" selected>${response.unit.name}</option>`;
+                    $('.unitDropdown').append(newOptionHTML).trigger('change');
                     
                     // Close modal & reset form
                     $('#addUnitModal').modal('hide');

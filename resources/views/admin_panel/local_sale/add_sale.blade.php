@@ -211,6 +211,8 @@
                     </div>
                 </div>
 
+
+
                 <div class="card mb-3">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -233,7 +235,12 @@
                                         <td class="text-center"><span class="row-index">{{ $i + 1 }}</span></td>
                                         <td style="position:relative;">
                                             <input type="hidden" name="item_id[]" class="item-id">
-                                            <input type="text" name="item_name[]" class="form-control item-input" autocomplete="off" placeholder="Product Name">
+                                            <div class="input-group input-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary mode-toggle px-2" title="Toggle Search/Manual" tabindex="-1">
+                                                    <i class="fas fa-search mode-icon"></i>
+                                                </button>
+                                                <input type="text" name="item_name[]" class="form-control item-input" autocomplete="off" placeholder="Search Product" data-mode="search">
+                                            </div>
                                             <div class="autocomplete-list d-none"></div>
                                         </td>
                                         <td>
@@ -433,8 +440,16 @@
         r.find('.qty').val(1);
         r.find('.rate').val('');
         r.find('.item-total').val('0.00');
-        r.find('.unit').val(it.unit || '');
+        r.find('.unit').val('pcs');
         r.find('.autocomplete-list').addClass('d-none').empty();
+        
+        // Reset toggle to search mode
+        let input = r.find('.item-input');
+        input.attr('data-mode', 'search');
+        input.attr('placeholder', 'Search Product');
+        let btn = r.find('.mode-toggle');
+        btn.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+        btn.find('.mode-icon').removeClass('fa-keyboard').addClass('fa-search');
         
         $('#saleTableBody').append(r);
         updateRowNumbers();
@@ -494,17 +509,39 @@
     $(document).ready(function() {
         updateRowNumbers();
 
+        // Row Input Mode Toggle
+        $(document).on('click', '.mode-toggle', function() {
+            let btn = $(this);
+            let icon = btn.find('.mode-icon');
+            let input = btn.siblings('.item-input');
+            
+            if (input.attr('data-mode') === 'search') {
+                input.attr('data-mode', 'manual');
+                icon.removeClass('fa-search').addClass('fa-keyboard');
+                btn.removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+                input.attr('placeholder', 'Manual Entry');
+                input.closest('td').find('.autocomplete-list').addClass('d-none');
+            } else {
+                input.attr('data-mode', 'search');
+                icon.removeClass('fa-keyboard').addClass('fa-search');
+                btn.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+                input.attr('placeholder', 'Search Product');
+            }
+            input.focus();
+        });
+
         // Autocomplete Logic
-        $(document).on('input', '.item-input', function () {
+        $(document).on('focus input', '.item-input', function (e) {
             let input = $(this);
             let row = input.closest('tr');
             let list = row.find('.autocomplete-list');
-            let q = input.val().trim();
-
-            if (!q) {
+            
+            if (input.attr('data-mode') === 'manual') {
                 list.addClass('d-none');
                 return;
             }
+
+            let q = input.val().trim();
 
             $.ajax({
                 url: "{{ route('get.items') }}",
