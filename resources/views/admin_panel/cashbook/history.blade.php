@@ -11,14 +11,33 @@
             <div class="page-header">
                 <div class="page-title">
                     <h4>Cash Book History</h4>
-                    <h6>View all daily closing balances</h6>
+                    <h6>
+                        Showing ledger for:
+                        <strong>{{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }}</strong>
+                    </h6>
                 </div>
-                <div class="page-btn">
+                <div class="page-btn d-flex gap-2 align-items-center flex-wrap">
+
+                    {{-- Month Filter --}}
+                    <form method="GET" action="{{ route('cash-book.history') }}" class="d-flex align-items-center gap-2 mb-0">
+                        <label class="mb-0 fw-semibold text-nowrap" for="monthFilter">
+                            <i class="fa fa-filter"></i> Filter Month:
+                        </label>
+                        <select name="month" id="monthFilter" class="form-select form-select-sm" style="min-width:160px;" onchange="this.form.submit()">
+                            @foreach($availableMonths as $ym)
+                                <option value="{{ $ym }}" {{ $selectedMonth === $ym ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::parse($ym . '-01')->format('F Y') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+
                     <a href="{{ route('cash-book') }}" class="btn btn-primary">
-                        <i class="fa fa-arrow-left"></i> Back to Daily View
+                        <i class="fa fa-arrow-left"></i> Back to Monthly View
                     </a>
                 </div>
             </div>
+
 
             {{-- HISTORY TABLE --}}
             <div class="card">
