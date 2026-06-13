@@ -38,6 +38,7 @@
                                 <th>Unit</th>
                                 <th>Purchase</th>
                                 <th>Sale</th>
+                                <th>Stock</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -50,12 +51,22 @@
                                     <td>Rs. {{ number_format($p->wholesale_price, 2) }}</td>
                                     <td>Rs. {{ number_format($p->retail_price, 2) }}</td>
                                     <td>
+                                        @if($p->initial_stock <= 0)
+                                            <span class="badges bg-lightred">Out of Stock (0)</span>
+                                        @elseif($p->initial_stock <= 5)
+                                            <span class="badges bg-lightyellow">Low Stock ({{ $p->initial_stock }})</span>
+                                        @else
+                                            <span class="badges bg-lightgreen">In Stock ({{ $p->initial_stock }})</span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         <button class="btn btn-sm btn-primary editProductBtn"
                                                 data-id="{{ $p->id }}"
                                                 data-name="{{ $p->item_name }}"
                                                 data-unit="{{ $p->unit }}"
                                                 data-wholesale="{{ $p->wholesale_price }}"
                                                 data-retail="{{ $p->retail_price }}"
+                                                data-stock="{{ $p->initial_stock }}"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editProductModal">
                                             Edit
@@ -120,6 +131,14 @@
                         </div>
                     </div>
 
+                    <!-- {{-- STOCK --}} -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-control" name="initial_stock" value="0" required min="0">
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer">
@@ -173,6 +192,14 @@
                             <input type="number" step="0.01" class="form-control" name="retail_price" id="edit_retail_price" required>
                         </div>
                     </div>
+
+                    {{-- STOCK --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-control" name="initial_stock" id="edit_initial_stock" required min="0">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -217,6 +244,7 @@
         let unit = $(this).data("unit");
         let wholesale = $(this).data("wholesale");
         let retail = $(this).data("retail");
+        let stock = $(this).data("stock");
 
         // Set the form action URL with the product ID
         $("#editProductForm").attr("action", "{{ url('/product/update') }}");
@@ -226,6 +254,7 @@
         $("#edit_unit").val(unit);
         $("#edit_wholesale_price").val(wholesale);
         $("#edit_retail_price").val(retail);
+        $("#edit_initial_stock").val(stock);
     });
 
 

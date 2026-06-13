@@ -41,6 +41,7 @@ class ProductController extends Controller
             'item_name' => 'required|string|max:255',
             'wholesale_price' => 'required|numeric|min:0',
             'retail_price' => 'required|numeric|min:0',
+            'initial_stock' => 'required|integer|min:0',
         ]);
 
         // Generate item code
@@ -55,6 +56,7 @@ class ProductController extends Controller
             'unit' => $request->unit,
             'wholesale_price' => $request->wholesale_price,
             'retail_price' => $request->retail_price,
+            'initial_stock' => $request->initial_stock,
         ];
 
         // If soft-deleted product exists, restore and update it
@@ -77,6 +79,7 @@ class ProductController extends Controller
             'item_name' => 'required|string|max:255',
             'wholesale_price' => 'required|numeric|min:0',
             'retail_price' => 'required|numeric|min:0',
+            'initial_stock' => 'required|integer|min:0',
         ]);
 
         // Get product ID from request
@@ -87,6 +90,7 @@ class ProductController extends Controller
             'unit' => $request->unit,
             'wholesale_price' => $request->wholesale_price,
             'retail_price' => $request->retail_price,
+            'initial_stock' => $request->initial_stock,
         ];
 
         Product::where('id', $id)->update($data);
