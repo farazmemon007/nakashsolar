@@ -43,7 +43,8 @@ class Purchase extends Model
     public static function generateInvoiceNo()
     {
         $prefix = 'INVPURC-';
-        $lastInvoice = self::orderBy('id', 'desc')->first();
+        // Exclude soft-deleted purchases when finding the last invoice
+        $lastInvoice = self::withoutTrashed()->orderBy('id', 'desc')->first();
         $lastNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, strlen($prefix)) : 0;
         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         return $prefix.$newNumber;
