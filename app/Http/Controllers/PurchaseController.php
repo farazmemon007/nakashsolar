@@ -59,162 +59,180 @@ class PurchaseController extends Controller
 
     public function store_Purchase(Request $request)
     {
-        // ================= VALIDATION =================
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'purchase_date' => 'required|date',
-            'party_code' => 'required',
-            'party_name' => 'required',
-            'grand_total' => 'required|numeric|min:0',
-        ], [
-            'party_name.required' => 'Vendor name is required',
-            'party_code.required' => 'Vendor code is required',
-        ]);
+        try {
+            // ================= VALIDATION =================
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'purchase_date' => 'required|date',
+                'party_code' => 'required',
+                'party_name' => 'required|numeric',
+                'grand_total' => 'required|numeric|min:0',
+            ], [
+                'party_name.required' => 'Vendor name is required',
+                'party_name.numeric' => 'Invalid vendor selected',
+                'party_code.required' => 'Vendor code is required',
+            ]);
 
-        // Check if request is AJAX
-        if ($request->ajax() || $request->wantsJson()) {
             if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-        } else {
-            if ($validator->fails()) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
                 return back()->withErrors($validator)->withInput();
             }
-        }
 
-        $userId = Auth::id();
-        $invoiceNo = Purchase::generateInvoiceNo();
+            // ================= VERIFY VENDOR EXISTS =================
+            $vendorId = (int) $request->party_name;
+            $vendor = Vendor::findOrFail($vendorId);
 
-        // ================= ITEMS (FILTER EMPTY ROWS) =================
-        $item_names = $request->item_name ?? [];
-        $rates = $request->rate ?? [];
-        $cartons = $request->unit ?? [];
-        $pcs = $request->pcs ?? [];
-        $discounts = $request->discount ?? [];
-        $amounts = $request->amount ?? [];
-        $pcs_carton = $request->pcs_carton ?? [];
+            $userId = Auth::id();
+            $invoiceNo = Purchase::generateInvoiceNo();
 
-        $rows = [];
-        $itemErrors = [];
+            // ================= ITEMS (FILTER EMPTY ROWS) =================
+            $item_names = $request->item_name ?? [];
+            $rates = $request->rate ?? [];
+            $cartons = $request->unit ?? [];
+            $pcs = $request->pcs ?? [];
+            $discounts = $request->discount ?? [];
+            $amounts = $request->amount ?? [];
+            $pcs_carton = $request->pcs_carton ?? [];
 
-        foreach ($item_names as $i => $name) {
-            $itemPcs = (int) ($pcs[$i] ?? 0);
-            $itemRate = (int) ($rates[$i] ?? 0);
+            $rows = [];
+            $itemErrors = [];
 
-            // Only process rows with data
-            if (trim($name) !== '' || $itemRate > 0 || $itemPcs > 0) {
+            foreach ($item_names as $i => $name) {
+                $itemPcs = (int) ($pcs[$i] ?? 0);
+                $itemRate = (float) ($rates[$i] ?? 0);
 
-                // Only add valid rows
-                if (trim($name) !== '') {
-                    $rows[] = [
-                        'item_name' => $name,
-                        'rate' => $rates[$i] ?? 0,
-                        'product_mode' => $cartons[$i] ?? '',
-                        'pcs' => $itemPcs,
-                        'discount' => $discounts[$i] ?? 0,
-                        'amount' => $amounts[$i] ?? 0,
-                        'pcs_carton' => $pcs_carton[$i] ?? 0,
-                    ];
+                // Only process rows with data
+                if (trim($name) !== '' || $itemRate > 0 || $itemPcs > 0) {
+                    // Only add valid rows
+                    if (trim($name) !== '') {
+                        $rows[] = [
+                            'item_name' => trim($name),
+                            'rate' => $itemRate,
+                            'product_mode' => $cartons[$i] ?? '',
+                            'pcs' => $itemPcs,
+                            'discount' => (float) ($discounts[$i] ?? 0),
+                            'amount' => (float) ($amounts[$i] ?? 0),
+                            'pcs_carton' => (int) ($pcs_carton[$i] ?? 0),
+                        ];
+                    }
                 }
             }
-        }
 
-        // Return item-specific errors
-        if (count($itemErrors) > 0) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => ['items' => $itemErrors]
-                ], 422);
+            if (count($rows) === 0) {
+                $errorMsg = 'At least one complete item is required (with Item Name)';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ['items' => [$errorMsg]]
+                    ], 422);
+                }
+                return back()->withErrors(['items' => $errorMsg])->withInput();
             }
-            return back()->withErrors(['items' => implode(', ', $itemErrors)]);
-        }
 
-        if (count($rows) === 0) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => ['items' => ['At least one complete item is required (with Item Name)']]
-                ], 422);
-            }
-            return back()->withErrors(['items' => 'At least one item is required']);
-        }
-
-        // ================= SAVE PURCHASE =================
-        $purchase = Purchase::create([
-            'admin_or_user_id' => $userId,
-            'invoice_number' => $invoiceNo,
-            'purchase_date' => $request->purchase_date,
-            'party_code' => $request->party_code,
-            'party_name' => $request->party_name,
-            'item' => json_encode(array_column($rows, 'item_name')),
-            'rate' => json_encode(array_column($rows, 'rate')),
-            'product_mode' => json_encode(array_column($rows, 'product_mode')),
-            'pcs' => json_encode(array_column($rows, 'pcs')),
-            'discount' => json_encode(array_column($rows, 'discount')),
-            'amount' => json_encode(array_column($rows, 'amount')),
-            'pcs_carton' => json_encode(array_column($rows, 'pcs_carton')),
-            'grand_total' => $request->grand_total,
-        ]);
-
-        // ================= UPDATE PRODUCT STOCK =================
-        foreach ($rows as $row) {
-            $product = Product::where('item_name', $row['item_name'])->first();
-            if ($product) {
-                $product->wholesale_price = $row['rate'];
-                // Increment available stock by purchased pcs
-                $product->initial_stock = ($product->initial_stock ?? 0) + ($row['pcs'] ?? 0);
-                $product->save();
-            }
-        }
-
-        // ================= VENDOR LEDGER (FINAL & CORRECT) =================
-        $ledger = VendorLedger::where('vendor_id', $request->party_name)->first();
-
-        $currentAmount = $request->grand_total;
-
-        if ($ledger) {
-
-            // ✅ previous = last closing
-            $previousBalance = $ledger->closing_balance;
-
-            $closingBalance = $previousBalance + $currentAmount;
-
-            $ledger->update([
-                'previous_balance' => $previousBalance,
-                'closing_balance' => $closingBalance,
-            ]);
-
-        } else {
-
-            // ✅ First time vendor
-            $openingBalance = 0; // agar vendor table me opening ho to wahan se lao
-            $previousBalance = $openingBalance;
-            $closingBalance = $openingBalance + $currentAmount;
-
-            VendorLedger::create([
+            // ================= SAVE PURCHASE WITH VENDOR_ID =================
+            $purchase = Purchase::create([
                 'admin_or_user_id' => $userId,
-                'vendor_id' => $request->party_name,
-                'opening_balance' => $openingBalance,
-                'previous_balance' => $previousBalance,
-                'closing_balance' => $closingBalance,
+                'vendor_id' => $vendorId,
+                'invoice_number' => $invoiceNo,
+                'purchase_date' => $request->purchase_date,
+                'party_code' => $vendor->Party_code,
+                'party_name' => $vendor->id,
+                'item' => json_encode(array_column($rows, 'item_name')),
+                'rate' => json_encode(array_column($rows, 'rate')),
+                'product_mode' => json_encode(array_column($rows, 'product_mode')),
+                'pcs' => json_encode(array_column($rows, 'pcs')),
+                'discount' => json_encode(array_column($rows, 'discount')),
+                'amount' => json_encode(array_column($rows, 'amount')),
+                'pcs_carton' => json_encode(array_column($rows, 'pcs_carton')),
+                'grand_total' => (float) $request->grand_total,
             ]);
-        }
 
-        // ================= RESPONSE =================
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Purchase saved & ledger updated successfully!',
-                'redirect' => route('purchase.invoice', $purchase->id)
+            // ================= UPDATE PRODUCT STOCK =================
+            foreach ($rows as $row) {
+                $product = Product::where('item_name', $row['item_name'])->first();
+                if ($product) {
+                    $product->wholesale_price = $row['rate'];
+                    $product->initial_stock = ($product->initial_stock ?? 0) + $row['pcs'];
+                    $product->save();
+                }
+            }
+
+            // ================= UPDATE VENDOR LEDGER =================
+            $ledger = VendorLedger::where('vendor_id', $vendorId)->latest()->first();
+
+            $currentAmount = (float) $request->grand_total;
+            $openingBalance = $vendor->opening_balance ?? 0;
+
+            if ($ledger) {
+                $previousBalance = $ledger->closing_balance;
+                $closingBalance = $previousBalance + $currentAmount;
+
+                $ledger->update([
+                    'previous_balance' => $previousBalance,
+                    'closing_balance' => $closingBalance,
+                ]);
+            } else {
+                $previousBalance = $openingBalance;
+                $closingBalance = $openingBalance + $currentAmount;
+
+                VendorLedger::create([
+                    'admin_or_user_id' => $userId,
+                    'vendor_id' => $vendorId,
+                    'opening_balance' => $openingBalance,
+                    'previous_balance' => $previousBalance,
+                    'closing_balance' => $closingBalance,
+                ]);
+            }
+
+            // ================= RESPONSE =================
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Purchase saved & ledger updated successfully!',
+                    'redirect' => route('purchase.invoice', $purchase->id)
+                ]);
+            }
+
+            return redirect()
+                ->route('purchase.invoice', $purchase->id)
+                ->with('success', 'Purchase saved & ledger updated successfully');
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Purchase Store - Database Error: ' . $e->getMessage(), [
+                'request_data' => $request->except(['*password*']),
+                'trace' => $e->getTraceAsString()
             ]);
-        }
+            
+            $message = 'Database error occurred. Please try again.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'error' => config('app.debug') ? $e->getMessage() : 'Database error'
+                ], 500);
+            }
+            return back()->withErrors(['error' => $message])->withInput();
 
-        return redirect()
-            ->route('purchase.invoice', $purchase->id)
-            ->with('success', 'Purchase saved & ledger updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Purchase Store - General Error: ' . $e->getMessage(), [
+                'request_data' => $request->except(['*password*']),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            $message = 'An unexpected error occurred. Please try again.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
+            }
+            return back()->withErrors(['error' => $message])->withInput();
+        }
     }
 
     public function all_Purchases()
@@ -239,33 +257,51 @@ class PurchaseController extends Controller
 
     public function purchaseInvoice($id)
     {
-        $purchase = Purchase::with('vendor')->findOrFail($id);
+        try {
+            $purchase = Purchase::with('vendor')->findOrFail($id);
 
-        $amounts = json_decode($purchase->amount, true) ?? [];
-        // dd($amounts);
-        $discounts = json_decode($purchase->discount, true) ?? [];
+            $amounts = json_decode($purchase->amount, true) ?? [];
+            $discounts = json_decode($purchase->discount, true) ?? [];
 
-        $grossTotal = array_sum($amounts);
-        $discountTotal = array_sum($discounts);
-        $netTotal = $grossTotal ;
-        // dd($netTotal);
+            $grossTotal = array_sum($amounts);
+            $discountTotal = array_sum($discounts);
+            $netTotal = $grossTotal - $discountTotal;
 
-        // ✅ Ledger se DIRECT uthao
-        $ledger = VendorLedger::where('vendor_id', $purchase->party_name)->first();
+            // Get ledger for this purchase
+            $ledger = VendorLedger::where('vendor_id', $purchase->party_name)
+                ->latest()
+                ->first();
 
-        $openingBalance = $ledger->opening_balance ?? 0;
-        $previousBalance = $ledger->previous_balance ?? 0;
-        $closingBalance = $ledger->closing_balance ?? 0;
+            if (!$ledger) {
+                \Log::warning("No vendor ledger found for purchase {$id}", [
+                    'vendor_id' => $purchase->party_name
+                ]);
+            }
 
-        return view('admin_panel.purchase.invoice', compact(
-            'purchase',
-            'grossTotal',
-            'discountTotal',
-            'netTotal',
-            'openingBalance',
-            'previousBalance',
-            'closingBalance'
-        ));
+            $openingBalance = $ledger->opening_balance ?? 0;
+            $previousBalance = $ledger->previous_balance ?? 0;
+            $closingBalance = $ledger->closing_balance ?? 0;
+
+            return view('admin_panel.purchase.invoice', compact(
+                'purchase',
+                'grossTotal',
+                'discountTotal',
+                'netTotal',
+                'openingBalance',
+                'previousBalance',
+                'closingBalance'
+            ));
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Purchase not found: ' . $id);
+            abort(404, 'Purchase not found');
+        } catch (\Exception $e) {
+            \Log::error('Error loading purchase invoice: ' . $e->getMessage(), [
+                'purchase_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            abort(500, 'Error loading purchase invoice');
+        }
     }
 
     public function purchaseedit($id)
@@ -286,155 +322,194 @@ class PurchaseController extends Controller
 
     public function update_purchase(Request $request, $id)
     {
-        // ================= VALIDATION =================
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'purchase_date' => 'required|date',
-            'party_code' => 'required',
-            'party_name' => 'required',
-            'grand_total' => 'required|numeric|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $userId = Auth::id();
-        $purchase = Purchase::findOrFail($id);
-
-        // ================= GET OLD ITEMS FOR STOCK ADJUSTMENT =================
-        $oldItems = json_decode($purchase->item, true) ?? [];
-        $oldPcs = json_decode($purchase->pcs, true) ?? [];
-
-        // ================= ITEMS (FILTER EMPTY ROWS) =================
-        $item_names = $request->item_name ?? [];
-        $rates = $request->rate ?? [];
-        $productModes = $request->unit ?? [];
-        $pcs = $request->pcs ?? [];
-        $discounts = $request->discount ?? [];
-        $amounts = $request->amount ?? [];
-
-        $rows = [];
-
-        foreach ($item_names as $i => $name) {
-            $itemPcs = (int) ($pcs[$i] ?? 0);
-
-            if (trim($name) !== '') {
-                $rows[] = [
-                    'item_name' => $name,
-                    'rate' => $rates[$i] ?? 0,
-                    'product_mode' => $productModes[$i] ?? '',
-                    'pcs' => $itemPcs,
-                    'discount' => $discounts[$i] ?? 0,
-                    'amount' => $amounts[$i] ?? 0,
-                ];
-            }
-        }
-
-        if (count($rows) === 0) {
-            return back()->withErrors(['items' => 'At least one complete item is required'])->withInput();
-        }
-
-        // ================= CALCULATE LEDGER DIFFERENCE =================
-        $oldGrandTotal = $purchase->grand_total;
-        $newGrandTotal = $request->grand_total;
-        $diffAmount = $newGrandTotal - $oldGrandTotal;
-
-        // ================= UPDATE VENDOR LEDGER =================
-        $ledger = VendorLedger::where('vendor_id', $request->party_name)->first();
-
-        if ($ledger) {
-            $ledger->closing_balance = $ledger->closing_balance + $diffAmount;
-            $ledger->admin_or_user_id = $userId;
-            $ledger->updated_at = now();
-            $ledger->save();
-        } else {
-            VendorLedger::create([
-                'vendor_id' => $request->party_name,
-                'admin_or_user_id' => $userId,
-                'previous_balance' => 0,
-                'closing_balance' => $newGrandTotal,
-                'updated_at' => now(),
+        try {
+            // ================= VALIDATION =================
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'purchase_date' => 'required|date',
+                'party_code' => 'required',
+                'party_name' => 'required|numeric',
+                'grand_total' => 'required|numeric|min:0',
             ]);
-        }
 
-        // ================= UPDATE PURCHASE =================
-        $purchase->update([
-            'admin_or_user_id' => $userId,
-            'purchase_date' => $request->purchase_date,
-            'party_code' => $request->party_code,
-            'party_name' => $request->party_name,
-            'item' => json_encode(array_column($rows, 'item_name')),
-            'rate' => json_encode(array_column($rows, 'rate')),
-            'product_mode' => json_encode(array_column($rows, 'product_mode')),
-            'pcs' => json_encode(array_column($rows, 'pcs')),
-            'discount' => json_encode(array_column($rows, 'discount')),
-            'amount' => json_encode(array_column($rows, 'amount')),
-            'grand_total' => $newGrandTotal,
-        ]);
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
 
-        // ================= REVERSE OLD STOCK & UPDATE WITH NEW STOCK =================
-        // First, reverse old stock
-        foreach ($oldItems as $i => $oldItemName) {
-            $oldQty = (int) ($oldPcs[$i] ?? 0);
-            if ($oldItemName && $oldQty > 0) {
-                $product = Product::where('item_name', $oldItemName)->first();
+            $userId = Auth::id();
+            $purchase = Purchase::findOrFail($id);
+            $vendorId = (int) $request->party_name;
+
+            // Verify vendor exists
+            $vendor = Vendor::findOrFail($vendorId);
+
+            // ================= GET OLD ITEMS FOR STOCK ADJUSTMENT =================
+            $oldItems = json_decode($purchase->item, true) ?? [];
+            $oldPcs = json_decode($purchase->pcs, true) ?? [];
+
+            // ================= ITEMS (FILTER EMPTY ROWS) =================
+            $item_names = $request->item_name ?? [];
+            $rates = $request->rate ?? [];
+            $productModes = $request->unit ?? [];
+            $pcs = $request->pcs ?? [];
+            $discounts = $request->discount ?? [];
+            $amounts = $request->amount ?? [];
+
+            $rows = [];
+
+            foreach ($item_names as $i => $name) {
+                $itemPcs = (int) ($pcs[$i] ?? 0);
+                $itemRate = (float) ($rates[$i] ?? 0);
+
+                if (trim($name) !== '') {
+                    $rows[] = [
+                        'item_name' => trim($name),
+                        'rate' => $itemRate,
+                        'product_mode' => $productModes[$i] ?? '',
+                        'pcs' => $itemPcs,
+                        'discount' => (float) ($discounts[$i] ?? 0),
+                        'amount' => (float) ($amounts[$i] ?? 0),
+                    ];
+                }
+            }
+
+            if (count($rows) === 0) {
+                return back()->withErrors(['items' => 'At least one complete item is required'])->withInput();
+            }
+
+            // ================= CALCULATE LEDGER DIFFERENCE =================
+            $oldGrandTotal = (float) $purchase->grand_total;
+            $newGrandTotal = (float) $request->grand_total;
+            $diffAmount = $newGrandTotal - $oldGrandTotal;
+
+            // ================= UPDATE VENDOR LEDGER =================
+            $ledger = VendorLedger::where('vendor_id', $vendorId)->latest()->first();
+
+            if ($ledger) {
+                $ledger->update([
+                    'previous_balance' => $ledger->closing_balance,
+                    'closing_balance' => $ledger->closing_balance + $diffAmount,
+                ]);
+            } else {
+                // Shouldn't happen for existing purchase, but handle it
+                VendorLedger::create([
+                    'vendor_id' => $vendorId,
+                    'admin_or_user_id' => $userId,
+                    'opening_balance' => 0,
+                    'previous_balance' => 0,
+                    'closing_balance' => $newGrandTotal,
+                ]);
+            }
+
+            // ================= UPDATE PURCHASE =================
+            $purchase->update([
+                'admin_or_user_id' => $userId,
+                'vendor_id' => $vendorId,
+                'purchase_date' => $request->purchase_date,
+                'party_code' => $vendor->Party_code,
+                'party_name' => $vendorId,
+                'item' => json_encode(array_column($rows, 'item_name')),
+                'rate' => json_encode(array_column($rows, 'rate')),
+                'product_mode' => json_encode(array_column($rows, 'product_mode')),
+                'pcs' => json_encode(array_column($rows, 'pcs')),
+                'discount' => json_encode(array_column($rows, 'discount')),
+                'amount' => json_encode(array_column($rows, 'amount')),
+                'grand_total' => $newGrandTotal,
+            ]);
+
+            // ================= REVERSE OLD STOCK & UPDATE WITH NEW STOCK =================
+            // First, reverse old stock
+            foreach ($oldItems as $i => $oldItemName) {
+                $oldQty = (int) ($oldPcs[$i] ?? 0);
+                if ($oldItemName && $oldQty > 0) {
+                    $product = Product::where('item_name', $oldItemName)->first();
+                    if ($product) {
+                        $product->initial_stock = max(0, ($product->initial_stock ?? 0) - $oldQty);
+                        $product->save();
+                    }
+                }
+            }
+
+            // Then, add new stock
+            foreach ($rows as $row) {
+                $product = Product::where('item_name', $row['item_name'])->first();
                 if ($product) {
-                    // Subtract old stock
-                    $product->initial_stock = max(0, ($product->initial_stock ?? 0) - $oldQty);
+                    $product->wholesale_price = $row['rate'];
+                    $product->initial_stock = ($product->initial_stock ?? 0) + $row['pcs'];
                     $product->save();
                 }
             }
-        }
 
-        // Then, add new stock
-        foreach ($rows as $row) {
-            $product = Product::where('item_name', $row['item_name'])->first();
-            if ($product) {
-                $product->wholesale_price = $row['rate'];
-                // Add new stock
-                $product->initial_stock = ($product->initial_stock ?? 0) + ($row['pcs'] ?? 0);
-                $product->save();
-            }
-        }
+            return redirect()
+                ->route('all-Purchases')
+                ->with('success', 'Purchase updated successfully!');
 
-        // ================= REDIRECT =================
-        return redirect()->route('all-Purchases')->with('success', 'Purchase updated successfully!');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Update Purchase - Model not found: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Purchase or Vendor not found'])->withInput();
+
+        } catch (\Exception $e) {
+            \Log::error('Update Purchase - Error: ' . $e->getMessage(), [
+                'purchase_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to update purchase. Please try again.'])->withInput();
+        }
     }
 
     public function delete_purchase($id)
     {
-        $userId = Auth::id();
-        $purchase = Purchase::findOrFail($id);
+        try {
+            $userId = Auth::id();
+            $purchase = Purchase::findOrFail($id);
+            $vendorId = (int) $purchase->party_name;
 
-        // ================= REVERSE VENDOR LEDGER =================
-        $ledger = VendorLedger::where('vendor_id', $purchase->party_name)->first();
-        if ($ledger) {
-            $ledger->closing_balance = $ledger->closing_balance - $purchase->grand_total;
-            $ledger->admin_or_user_id = $userId;
-            $ledger->updated_at = now();
-            $ledger->save();
-        }
+            // ================= REVERSE VENDOR LEDGER =================
+            $ledger = VendorLedger::where('vendor_id', $vendorId)->latest()->first();
+            
+            if ($ledger) {
+                $ledger->update([
+                    'closing_balance' => $ledger->closing_balance - $purchase->grand_total,
+                ]);
+            }
 
-        // ================= REVERSE STOCK =================
-        $oldItems = json_decode($purchase->item, true) ?? [];
-        $oldPcs = json_decode($purchase->pcs, true) ?? [];
+            // ================= REVERSE STOCK =================
+            $oldItems = json_decode($purchase->item, true) ?? [];
+            $oldPcs = json_decode($purchase->pcs, true) ?? [];
 
-        foreach ($oldItems as $i => $itemName) {
-            $qty = (int) ($oldPcs[$i] ?? 0);
-            if ($itemName && $qty > 0) {
-                $product = Product::where('item_name', $itemName)->first();
-                if ($product) {
-                    // Subtract stock
-                    $product->initial_stock = max(0, ($product->initial_stock ?? 0) - $qty);
-                    $product->save();
+            foreach ($oldItems as $i => $itemName) {
+                $qty = (int) ($oldPcs[$i] ?? 0);
+                if ($itemName && $qty > 0) {
+                    $product = Product::where('item_name', $itemName)->first();
+                    if ($product) {
+                        $product->initial_stock = max(0, ($product->initial_stock ?? 0) - $qty);
+                        $product->save();
+                    }
                 }
             }
+
+            // ================= SOFT DELETE PURCHASE =================
+            $purchase->delete();
+
+            \Log::info('Purchase deleted', [
+                'purchase_id' => $id,
+                'vendor_id' => $vendorId,
+                'amount' => $purchase->grand_total
+            ]);
+
+            return redirect()
+                ->route('all-Purchases')
+                ->with('success', 'Purchase deleted successfully!');
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Delete Purchase - Purchase not found: ' . $id);
+            return back()->withErrors(['error' => 'Purchase not found'])->withInput();
+
+        } catch (\Exception $e) {
+            \Log::error('Delete Purchase - Error: ' . $e->getMessage(), [
+                'purchase_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to delete purchase. Please try again.'])->withInput();
         }
-
-        // ================= DELETE PURCHASE =================
-        $purchase->delete();
-
-        // ================= REDIRECT =================
-        return redirect()->route('all-Purchases')->with('success', 'Purchase deleted successfully!');
     }
 }
