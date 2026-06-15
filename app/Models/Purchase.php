@@ -39,15 +39,27 @@ class Purchase extends Model
 
     /**
      * Generate unique invoice number for purchase
+     * Handles both active and soft-deleted records
      */
     public static function generateInvoiceNo()
     {
         $prefix = 'INVPURC-';
-        // Exclude soft-deleted purchases when finding the last invoice
-        $lastInvoice = self::withoutTrashed()->orderBy('id', 'desc')->first();
-        $lastNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, strlen($prefix)) : 0;
+        
+        // Get all invoice numbers (including soft-deleted) to find the highest
+        $allInvoices = self::withTrashed()
+            ->where('invoice_number', 'like', $prefix . '%')
+            ->pluck('invoice_number')
+            ->map(function ($invoice) use ($prefix) {
+                return (int) substr($invoice, strlen($prefix));
+            });
+        
+        // Get the highest number from all invoices
+        $lastNumber = $allInvoices->isNotEmpty() ? $allInvoices->max() : 0;
+        
+        // Generate new number, ensuring it's always incrementing
         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        return $prefix.$newNumber;
+        
+        return $prefix . $newNumber;
     }
 
     /**
