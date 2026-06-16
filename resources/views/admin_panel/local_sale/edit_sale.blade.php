@@ -15,6 +15,24 @@
         display: flex;
         gap: 4px
     }
+
+    .autocomplete-list {
+        position: fixed;
+        z-index: 99999;
+        background: #fff;
+        border: 1px solid #ddd;
+        max-height: 220px;
+        overflow-y: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .autocomplete-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: #e9ecef; }
 </style>
 
 <div class="main-wrapper">
@@ -120,8 +138,14 @@
                                             <td>
                                                 <span class="row-index">{{ $i + 1 }}</span>
                                             </td>
-                                            <td>
-                                                <input name="item[]" class="form-control readonly-box" value="{{ $item }}" readonly>
+                                            <td style="position:relative;">
+                                                <div class="input-group input-group-sm">
+                                                    <button type="button" class="btn btn-outline-secondary mode-toggle px-2" title="Toggle Search/Manual" tabindex="-1">
+                                                        <i class="fas fa-search mode-icon"></i>
+                                                    </button>
+                                                    <input name="item[]" class="form-control item-input" value="{{ $item }}" autocomplete="off" placeholder="Search Product" data-mode="search">
+                                                </div>
+                                                <div class="autocomplete-list d-none"></div>
                                             </td>
                                             <td>
                                                 <div class="qty-box">
@@ -238,6 +262,91 @@
         let r = $(this).closest('tr');
         r.find('.qty').val(Math.max(0, +r.find('.qty').val() - 1));
         calcRow(r);
+    });
+
+    // Row Input Mode Toggle
+    $(document).on('click', '.mode-toggle', function() {
+        let btn = $(this);
+        let icon = btn.find('.mode-icon');
+        let input = btn.siblings('.item-input');
+
+        if (input.attr('data-mode') === 'search') {
+            input.attr('data-mode', 'manual');
+            icon.removeClass('fa-search').addClass('fa-keyboard');
+            btn.removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+            input.attr('placeholder', 'Manual Entry');
+            input.closest('td').find('.autocomplete-list').addClass('d-none');
+        } else {
+            input.attr('data-mode', 'search');
+            icon.removeClass('fa-keyboard').addClass('fa-search');
+            btn.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+            input.attr('placeholder', 'Search Product');
+        }
+        input.focus();
+    });
+
+    // Single global autocomplete dropdown
+    let $acList = $('<div class="autocomplete-list d-none"></div>').appendTo('body');
+
+    function fetchProducts(input, q) {
+        let row = input.closest('tr');
+        if (input.attr('data-mode') === 'manual') { $acList.addClass('d-none'); return; }
+        $acList.data('row', row);
+        $.ajax({
+            url: "{{ route('get.items') }}",
+            type: "GET",
+            data: { q: q },
+            success: function (res) {
+                if (!Array.isArray(res) || res.length === 0) { $acList.addClass('d-none'); return; }
+                let offset = input.offset();
+                $acList.css({ left: offset.left + 'px', top: (offset.top + input.outerHeight()) + 'px', width: input.outerWidth() + 'px' });
+                $acList.empty().removeClass('d-none');
+                res.forEach(it => { $('<div class="autocomplete-item"></div>').text(it.item_name).data('item', it).appendTo($acList); });
+            },
+            error: function () { $acList.addClass('d-none'); }
+        });
+    }
+
+    // On focus: show all products; on input: filter by typed query
+    $(document).on('focus', '.item-input', function () { fetchProducts($(this), ''); });
+    $(document).on('input', '.item-input', function () { fetchProducts($(this), $(this).val().trim()); });
+
+    // Hide autocomplete when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.item-input, .autocomplete-list').length) {
+            $acList.addClass('d-none');
+        }
+    });
+
+    // Select item from autocomplete
+    $(document).on('click', '.autocomplete-item', function () {
+        let it = $(this).data('item');
+        let row = $acList.data('row');
+
+        if (!row || !row.length) return;
+
+        row.find('.item-input').val(it.item_name);
+
+        let price = parseFloat(it.retail_price) || parseFloat(it.wholesale_price) || 0;
+        row.find('.rate').val(price);
+
+        $acList.addClass('d-none');
+
+        calcRow(row);
+    });
+
+    // Reposition autocomplete on scroll/resize
+    $(window).on('scroll resize', function () {
+        if ($acList.hasClass('d-none')) return;
+        let row = $acList.data('row');
+        if (row && row.length) {
+            let input = row.find('.item-input');
+            let offset = input.offset();
+            $acList.css({
+                left: offset.left + 'px',
+                top: (offset.top + input.outerHeight()) + 'px'
+            });
+        }
     });
 
     // calculate all rows on load

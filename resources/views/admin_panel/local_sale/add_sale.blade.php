@@ -106,13 +106,12 @@
 
     /* Autocomplete */
     .autocomplete-list {
-        position: absolute;
-        z-index: 9999;
+        position: fixed;
+        z-index: 99999;
         background: #fff;
         border: 1px solid #ddd;
         max-height: 220px;
         overflow-y: auto;
-        width: 100%;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
@@ -549,50 +548,45 @@
             input.focus();
         });
 
-        // Autocomplete Logic
-        $(document).on('focus input', '.item-input', function (e) {
-            let input = $(this);
+        // Single global autocomplete dropdown
+        let $acList = $('<div class="autocomplete-list d-none"></div>').appendTo('body');
+
+        function fetchProducts(input, q) {
             let row = input.closest('tr');
-            let list = row.find('.autocomplete-list');
-            
-            if (input.attr('data-mode') === 'manual') {
-                list.addClass('d-none');
-                return;
-            }
-
-            let q = input.val().trim();
-
+            if (input.attr('data-mode') === 'manual') { $acList.addClass('d-none'); return; }
+            $acList.data('row', row);
             $.ajax({
                 url: "{{ route('get.items') }}",
                 type: "GET",
                 data: { q: q },
                 success: function (res) {
-                    if (!Array.isArray(res) || res.length === 0) {
-                        list.addClass('d-none');
-                        return;
-                    }
-
-                    list.empty().removeClass('d-none');
-                    res.forEach(it => {
-                        let el = $(`<div class="autocomplete-item">${it.item_name}</div>`);
-                        el.data('item', it);
-                        list.append(el);
-                    });
-                }
+                    if (!Array.isArray(res) || res.length === 0) { $acList.addClass('d-none'); return; }
+                    let offset = input.offset();
+                    $acList.css({ left: offset.left + 'px', top: (offset.top + input.outerHeight()) + 'px', width: input.outerWidth() + 'px' });
+                    $acList.empty().removeClass('d-none');
+                    res.forEach(it => { $('<div class="autocomplete-item"></div>').text(it.item_name).data('item', it).appendTo($acList); });
+                },
+                error: function () { $acList.addClass('d-none'); }
             });
-        });
+        }
+
+        // On focus: show all products; on input: filter by typed query
+        $(document).on('focus', '.item-input', function () { fetchProducts($(this), ''); });
+        $(document).on('input', '.item-input', function () { fetchProducts($(this), $(this).val().trim()); });
 
         // Hide autocomplete when clicking outside
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.item-input, .autocomplete-list').length) {
-                $('.autocomplete-list').addClass('d-none');
+                $acList.addClass('d-none');
             }
         });
 
         // Select item from autocomplete
         $(document).on('click', '.autocomplete-item', function () {
             let it = $(this).data('item');
-            let row = $(this).closest('tr');
+            let row = $acList.data('row');
+
+            if (!row || !row.length) return;
 
             row.find('.item-input').val(it.item_name);
             row.find('.item-id').val(it.id);
@@ -602,9 +596,23 @@
             row.find('.rate').val(price);
             row.find('.unit').val(it.unit || 'pcs');
 
-            row.find('.autocomplete-list').addClass('d-none');
+            $acList.addClass('d-none');
 
             calcRow(row);
+        });
+
+        // Reposition autocomplete on scroll/resize
+        $(window).on('scroll resize', function () {
+            if ($acList.hasClass('d-none')) return;
+            let row = $acList.data('row');
+            if (row && row.length) {
+                let input = row.find('.item-input');
+                let offset = input.offset();
+                $acList.css({
+                    left: offset.left + 'px',
+                    top: (offset.top + input.outerHeight()) + 'px'
+                });
+            }
         });
     });
 </script>

@@ -89,13 +89,12 @@
 <style>
     /* Simple styles for custom autocomplete dropdown */
     .autocomplete-list {
-        position: absolute;
-        z-index: 9999;
+        position: fixed;
+        z-index: 99999;
         background: #fff;
         border: 1px solid #ddd;
         max-height: 220px;
         overflow-y: auto;
-        width: 100%;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
@@ -473,50 +472,45 @@
             input.focus();
         });
 
-        // ========== AUTOCOMPLETE LOGIC ==========
-        $(document).on('focus input', '.item-input', function (e) {
-            let input = $(this);
+        // Single global autocomplete dropdown
+        let $acList = $('<div class="autocomplete-list d-none"></div>').appendTo('body');
+
+        function fetchProducts(input, q) {
             let row = input.closest('tr');
-            let list = row.find('.autocomplete-list');
-            
-            if (input.attr('data-mode') === 'manual') {
-                list.addClass('d-none');
-                return;
-            }
-
-            let q = input.val().trim();
-
+            if (input.attr('data-mode') === 'manual') { $acList.addClass('d-none'); return; }
+            $acList.data('row', row);
             $.ajax({
                 url: "{{ route('get.items') }}",
                 type: "GET",
                 data: { q: q },
                 success: function (res) {
-                    if (!Array.isArray(res) || res.length === 0) {
-                        list.addClass('d-none');
-                        return;
-                    }
-
-                    list.empty().removeClass('d-none');
-                    res.forEach(it => {
-                        let el = $(`<div class="autocomplete-item">${it.item_name}</div>`);
-                        el.data('item', it);
-                        list.append(el);
-                    });
-                }
+                    if (!Array.isArray(res) || res.length === 0) { $acList.addClass('d-none'); return; }
+                    let offset = input.offset();
+                    $acList.css({ left: offset.left + 'px', top: (offset.top + input.outerHeight()) + 'px', width: input.outerWidth() + 'px' });
+                    $acList.empty().removeClass('d-none');
+                    res.forEach(it => { $('<div class="autocomplete-item"></div>').text(it.item_name).data('item', it).appendTo($acList); });
+                },
+                error: function () { $acList.addClass('d-none'); }
             });
-        });
+        }
+
+        // ========== AUTOCOMPLETE LOGIC ==========
+        $(document).on('focus', '.item-input', function () { fetchProducts($(this), ''); });
+        $(document).on('input', '.item-input', function () { fetchProducts($(this), $(this).val().trim()); });
 
         // Hide autocomplete when clicking outside
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.item-input, .autocomplete-list').length) {
-                $('.autocomplete-list').addClass('d-none');
+                $acList.addClass('d-none');
             }
         });
 
         // Select item from autocomplete
         $(document).on('click', '.autocomplete-item', function () {
             let it = $(this).data('item');
-            let row = $(this).closest('tr');
+            let row = $acList.data('row');
+
+            if (!row || !row.length) return;
 
             row.find('.item-input').val(it.item_name);
             row.find('.item-id').val(it.id);
@@ -537,17 +531,15 @@
             // Rate
             row.find('.rate').val(parseInt(it.wholesale_price) || 0);
 
-            row.find('.autocomplete-list').addClass('d-none');
+            $acList.addClass('d-none');
 
             calculateRow(row);
-            autoAddIfNeeded();
         });
 
         // ========== CALCULATIONS ==========
         $(document).on('input', '.rate, .pcx, .discount', function () {
             let row = $(this).closest('tr');
             calculateRow(row);
-            autoAddIfNeeded();
         });
 
         $(document).on('input', '.amount', function () {
@@ -573,44 +565,22 @@
             $('#grandTotal').val(total);
         }
 
-        // ========== AUTO ADD ROW WHEN NEEDED ==========
-        function isRowFilled(row) {
-            let itemName = row.find('.item-input').val().trim();
-            let rate = parseInt(row.find('.rate').val()) || 0;
-            let pcs = parseInt(row.find('.pcx').val()) || 0;
-
-            // Row is considered filled if it has item name AND (rate OR pcs)
-            return itemName && (rate > 0 || pcs > 0);
-        }
-
-        function isRowEmpty(row) {
-            let itemName = row.find('.item-input').val().trim();
-            let rate = parseInt(row.find('.rate').val()) || 0;
-            let pcs = parseInt(row.find('.pcx').val()) || 0;
-
-            return !itemName && rate === 0 && pcs === 0;
-        }
-
-        function autoAddIfNeeded() {
-            let rows = $('#purchaseTable tbody tr');
-            let emptyRowExists = false;
-
-            rows.each(function () {
-                if (isRowEmpty($(this))) {
-                    emptyRowExists = true;
-                    return false; // break loop
-                }
-            });
-
-            // If no empty row exists, add one
-            if (!emptyRowExists) {
-                appendNewRow();
+        // Reposition autocomplete on scroll/resize
+        $(window).on('scroll resize', function () {
+            if ($acList.hasClass('d-none')) return;
+            let row = $acList.data('row');
+            if (row && row.length) {
+                let input = row.find('.item-input');
+                let offset = input.offset();
+                $acList.css({
+                    left: offset.left + 'px',
+                    top: (offset.top + input.outerHeight()) + 'px'
+                });
             }
-        }
+        });
 
         // Make functions globally accessible
         window.createRowHtml = createRowHtml;
-        window.autoAddIfNeeded = autoAddIfNeeded;
 
     });
 
