@@ -33,6 +33,27 @@
     }
     .autocomplete-item:last-child { border-bottom: none; }
     .autocomplete-item:hover { background: #e9ecef; }
+
+    /* Row Action Buttons */
+    .sale-row .add-row,
+    .sale-row .remove-row {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sale-row .add-row {
+        margin-right: 4px;
+    }
+    .sale-row .remove-row:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
 </style>
 
 <div class="main-wrapper">
@@ -123,11 +144,12 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 5%;">#</th>
-                                        <th style="width: 45%;">Product Name</th>
+                                        <th style="width: 40%;">Product Name</th>
                                         <th style="width: 15%;">Quantity</th>
                                         <th style="width: 10%;">Unit</th>
                                         <th style="width: 12%;">Price/unit</th>
-                                        <th style="width: 12%;">amount</th>
+                                        <th style="width: 10%;">amount</th>
+                                        <th style="width: 8%;">Action</th>
                                     </tr>
                                 </thead>
 
@@ -163,8 +185,54 @@
                                             <td>
                                                 <input name="amount[]" class="form-control item-total" value="{{ $amounts[$i] ?? 0 }}">
                                             </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success btn-sm add-row" title="Add row">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm remove-row" title="Delete row">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
+
+                                    <!-- template for JS-added rows -->
+                                    <tr class="sale-row d-none" id="rowTemplate">
+                                        <td><span class="row-index"></span></td>
+                                        <td style="position:relative;">
+                                            <div class="input-group input-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary mode-toggle px-2" title="Toggle Search/Manual" tabindex="-1">
+                                                    <i class="fas fa-search mode-icon"></i>
+                                                </button>
+                                                <input name="item[]" class="form-control item-input" autocomplete="off" placeholder="Search Product" data-mode="search">
+                                            </div>
+                                            <div class="autocomplete-list d-none"></div>
+                                        </td>
+                                        <td>
+                                            <div class="qty-box">
+                                                <button type="button" class="btn btn-sm btn-secondary qty-minus">−</button>
+                                                <input name="qty[]" class="form-control qty text-center" value="1">
+                                                <button type="button" class="btn btn-sm btn-secondary qty-plus">+</button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input name="unit[]" class="form-control unit text-center" value="">
+                                        </td>
+                                        <td>
+                                            <input name="rate[]" class="form-control rate" value="0">
+                                        </td>
+                                        <td>
+                                            <input name="amount[]" class="form-control item-total" value="0">
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-sm add-row" title="Add row">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm remove-row" title="Delete row">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
 
                                 </tbody>
                             </table>
@@ -354,5 +422,53 @@
     // calculate all rows on load
     $(document).ready(function () {
         calcGrand();
+    });
+
+    // ========== ROW ACTIONS ==========
+
+    function updateRowNumbers() {
+        $('#saleTableBody .sale-row').each(function (index) {
+            $(this).find('.row-index').text(index + 1);
+        });
+    }
+
+    function createRowHtml() {
+        return $('#rowTemplate').clone().removeClass('d-none').removeAttr('id');
+    }
+
+    // Add row (insert after current)
+    $(document).on('click', '.add-row', function () {
+        let currentRow = $(this).closest('tr.sale-row');
+        let newRow = createRowHtml();
+        currentRow.after(newRow);
+        updateRowNumbers();
+        calcGrand();
+        newRow.find('.item-input').focus();
+    });
+
+    // Remove row
+    $(document).on('click', '.remove-row', function () {
+        let rowCount = $('#saleTableBody .sale-row').length;
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+            updateRowNumbers();
+            calcGrand();
+        }
+    });
+
+    // Enter key: auto-add new row when pressing Enter in last row
+    $(document).on('keydown', '.sale-row input, .sale-row select', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            let currentRow = $(this).closest('tr.sale-row');
+            if (currentRow.length && currentRow.is('#saleTableBody .sale-row:last')) {
+                let newRow = createRowHtml();
+                currentRow.after(newRow);
+                updateRowNumbers();
+                calcGrand();
+                newRow.find('.item-input').focus();
+            }
+            return false;
+        }
     });
 </script>
