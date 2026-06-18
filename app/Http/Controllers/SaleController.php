@@ -188,11 +188,11 @@ class SaleController extends Controller
             if ($user->usertype === 'admin') {
                 $Sales = Sale::where('admin_or_user_id', $user->id)
                     ->with('distributor', 'assignedSalesman')
-                    ->get();
+                    ->paginate(15);
             } elseif ($user->usertype === 'distributor') {
                 $Sales = Sale::where('distributor_id', $user->user_id)
                     ->with('distributor', 'assignedSalesman')
-                    ->get();
+                    ->paginate(15);
             } else {
                 return redirect()->back()->with('error', 'Unauthorized access');
             }
