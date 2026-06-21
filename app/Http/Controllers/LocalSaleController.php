@@ -403,13 +403,13 @@ class LocalSaleController extends Controller
         $customerId = $sale->customer_id;
         $netAmount = $sale->net_amount;
 
-        $categories = json_decode($sale->category);
-        $subcategories = json_decode($sale->subcategory);
-        $codes = json_decode($sale->code);
-        $items = json_decode($sale->item);
-        $sizes = json_decode($sale->size);
-        $cartonQtys = json_decode($sale->carton_qty);
-        $pcs = json_decode($sale->pcs);
+        $categories = json_decode($sale->category) ?? [];
+        $subcategories = json_decode($sale->subcategory) ?? [];
+        $codes = json_decode($sale->code) ?? [];
+        $items = json_decode($sale->item) ?? [];
+        $sizes = json_decode($sale->size) ?? [];
+        $cartonQtys = json_decode($sale->carton_qty) ?? [];
+        $pcs = json_decode($sale->pcs) ?? [];
 
         for ($i = 0; $i < count($codes); $i++) {
             $product = Product::where('item_code', $codes[$i])
