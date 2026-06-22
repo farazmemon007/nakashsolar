@@ -161,7 +161,7 @@
         font-family: 'Inter', sans-serif;
     }
 
-    .dash-widget[onclick], .stat-mini-card[onclick] {
+    .dash-widget[onclick], .stat-mini-card[onclick], canvas {
         cursor: pointer;
     }
 </style>
@@ -213,7 +213,7 @@
                 </div>
 
                 <div class="col-lg-3 col-sm-6 col-12">
-                    <div class="dash-widget bg-emerald" onclick="window.location='{{ route('all-sale') }}'" title="View All Sales">
+                    <div class="dash-widget bg-emerald" onclick="window.location='{{ route('all-local-sale') }}'" title="View All Sales">
                         <div class="dash-widget-icon">
                             <i data-feather="trending-up"></i>
                         </div>
@@ -253,7 +253,7 @@
                 </div>
 
                 <div class="col-lg-3 col-sm-6 col-12">
-                    <div class="stat-mini-card" onclick="window.location='{{ route('expenses.index') }}'" title="View Expenses">
+                    <div class="stat-mini-card" onclick="window.location='{{ route('add-expenses') }}'" title="View Expenses">
                         <div class="stat-mini-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
                             <i data-feather="dollar-sign"></i>
                         </div>
@@ -265,7 +265,7 @@
                 </div>
 
                 <div class="col-lg-3 col-sm-6 col-12">
-                    <div class="stat-mini-card shadow-sm border-0" onclick="window.location='{{ route('all-sale') }}'" title="View Sales Report">
+                    <div class="stat-mini-card shadow-sm border-0" onclick="window.location='{{ route('all-local-sale') }}'" title="View Sales Report">
                         <div class="stat-mini-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
                             <i data-feather="activity"></i>
                         </div>
@@ -333,7 +333,7 @@
                 </div>
 
                 <div class="col-lg-3 col-sm-6 col-12">
-                    <div class="stat-mini-card" onclick="window.location='{{ route('all-sale') }}'" title="View Sales Invoices">
+                    <div class="stat-mini-card" onclick="window.location='{{ route('all-local-sale') }}'" title="View Sales Invoices">
                         <div class="stat-mini-icon" style="background: rgba(6, 182, 212, 0.1); color: #06b6d4;">
                             <i data-feather="file-text"></i>
                         </div>
@@ -516,6 +516,18 @@ new Chart(salesPurchaseCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        onClick: function(e, activeEls) {
+            if (activeEls.length > 0) {
+                const datasetIndex = activeEls[0].datasetIndex;
+                if (datasetIndex === 0) {
+                    window.location.href = "{{ route('Date-wise-Sales-Report') }}";
+                } else {
+                    window.location.href = "{{ route('date-wise-purcahse-report') }}";
+                }
+            } else {
+                window.location.href = "{{ route('Date-wise-Sales-Report') }}";
+            }
+        },
         plugins: {
             legend: {
                 display: true,
@@ -568,6 +580,9 @@ new Chart(paymentStatusCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        onClick: function() {
+            window.location.href = "{{ route('all-local-sale') }}";
+        },
         plugins: {
             legend: {
                 position: 'bottom'
@@ -615,6 +630,9 @@ if (topSellingItems && topSellingItems.length > 0) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: function() {
+                window.location.href = "{{ route('Product-wise-Sales-Report') }}";
+            },
             plugins: {
                 legend: {
                     position: 'bottom'
@@ -644,7 +662,7 @@ new Chart(topProductsCtx, {
         labels: topProducts.map(item => item.item_name),
         datasets: [{
             label: 'Revenue',
-            data: topProducts.map(item => item.total_revenue),
+            data: topProducts.map(item => item.total_sales),
             backgroundColor: 'rgba(28, 146, 98, 0.8)',
             borderColor: '#1c9262',
             borderRadius: 8,
@@ -655,6 +673,9 @@ new Chart(topProductsCtx, {
         responsive: true,
         maintainAspectRatio: false,
         indexAxis: 'y',
+        onClick: function() {
+            window.location.href = "{{ route('Product-wise-Sales-Report') }}";
+        },
         plugins: {
             legend: {
                 display: false

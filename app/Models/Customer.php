@@ -34,4 +34,9 @@ class Customer extends Model
     {
         return $this->hasMany(LocalSale::class, 'customer_id');
     }
+
+    public function ledger()
+    {
+        return $this->hasOne(CustomerLedger::class, 'customer_id');
+    }
 }

@@ -39,7 +39,7 @@ class CustomerController extends Controller
                 }
 
                 // Customers: admin ke bhi + salesman ke bhi
-                $customers = Customer::whereIn('admin_or_user_id', [$admin->id, $salesman->id])->get();
+                $customers = Customer::with('ledger')->whereIn('admin_or_user_id', [$admin->id, $salesman->id])->get();
             } else {
                 // If admin
                 $admin = $authUser;
@@ -50,7 +50,7 @@ class CustomerController extends Controller
                     ->pluck('id');
 
                 // Customers: admin ke bhi + salesmen ke bhi
-                $customers = Customer::where(function ($q) use ($admin, $salesmanIds) {
+                $customers = Customer::with('ledger')->where(function ($q) use ($admin, $salesmanIds) {
                     $q->where('admin_or_user_id', $admin->id)
                         ->orWhereIn('admin_or_user_id', $salesmanIds);
                 })->get();
@@ -269,13 +269,16 @@ class CustomerController extends Controller
             'address' => $request->address,
             'shop_name' => $request->shop_name,
             'business_type_name' => $request->business_type_name,
+            'opening_balance' => $request->opening_balance ?? 0,
         ]);
 
         $ledger = CustomerLedger::where('customer_id', $request->customer_id)->first();
-        $recapeAmount = $request->recape_opening;
+        $recapeAmount = $request->recape_opening ?? 0;
         $recapeType = $request->recape_type;
 
         if ($ledger) {
+            $ledger->opening_balance = $request->opening_balance ?? $ledger->opening_balance;
+
             if ($recapeType === 'plus') {
                 $ledger->opening_balance += $recapeAmount;
             } elseif ($recapeType === 'minus') {
@@ -284,13 +287,15 @@ class CustomerController extends Controller
 
             $ledger->previous_balance = $ledger->closing_balance;
             $ledger->closing_balance = $ledger->opening_balance;
+
             $ledger->save();
         } else {
             CustomerLedger::create([
                 'customer_id' => $request->customer_id,
-                'opening_balance' => $request->recape_opening ?? 0,
+                'opening_balance' => $request->opening_balance ?? $recapeAmount,
                 'previous_balance' => 0,
-                'closing_balance' => $request->recape_opening ?? 0,
+                'closing_balance' => $request->opening_balance ?? $recapeAmount,
+                'admin_or_user_id' => Auth::id() ?? $customer->admin_or_user_id,
             ]);
         }
 

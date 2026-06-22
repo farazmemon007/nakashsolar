@@ -71,7 +71,7 @@ class HomeController extends Controller
         $staffCount = \App\Models\Salesman::count();
 
         // Monthly Sales & Purchases (Last 12 Months) - Using net_amount for accurate revenue
-        $monthlylocal_sales = DB::table('local_sales')
+        $rawMonthlySales = DB::table('local_sales')
             ->select(
                 DB::raw('MONTH(created_at) as month'),
                 DB::raw('YEAR(created_at) as year'),
@@ -85,7 +85,7 @@ class HomeController extends Controller
             ->get();
 
 
-        $monthlyPurchases = DB::table('purchases')
+        $rawMonthlyPurchases = DB::table('purchases')
             ->select(
                 DB::raw('MONTH(created_at) as month'),
                 DB::raw('YEAR(created_at) as year'),
@@ -97,6 +97,50 @@ class HomeController extends Controller
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
             ->get();
+
+        // Align the monthly sales and purchases so they match month-by-month
+        $monthsList = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $year = (int)$date->format('Y');
+            $month = (int)$date->format('n');
+            $key = "{$year}-{$month}";
+            $monthsList[$key] = [
+                'month' => $month,
+                'year' => $year,
+                'sales' => 0.0,
+                'purchases' => 0.0
+            ];
+        }
+
+        foreach ($rawMonthlySales as $ms) {
+            $key = "{$ms->year}-{$ms->month}";
+            if (isset($monthsList[$key])) {
+                $monthsList[$key]['sales'] = (float)$ms->total;
+            }
+        }
+
+        foreach ($rawMonthlyPurchases as $mp) {
+            $key = "{$mp->year}-{$mp->month}";
+            if (isset($monthsList[$key])) {
+                $monthsList[$key]['purchases'] = (float)$mp->total;
+            }
+        }
+
+        $monthlylocal_sales = [];
+        $monthlyPurchases = [];
+        foreach ($monthsList as $data) {
+            $monthlylocal_sales[] = (object)[
+                'month' => $data['month'],
+                'year' => $data['year'],
+                'total' => $data['sales']
+            ];
+            $monthlyPurchases[] = (object)[
+                'month' => $data['month'],
+                'year' => $data['year'],
+                'total' => $data['purchases']
+            ];
+        }
 
         // =========================
         // Top Selling Items & Products

@@ -146,7 +146,7 @@
                         </div>
 
                         <div class="col-md-6 mt-2">
-                           <label class="form-label">Opening Balance (current)</label>
+                           <label class="form-label">Opening Balance</label>
                             <input type="number" name="opening_balance" class="form-control" id="edit_opening_balance" placeholder="Enter Opening Balance">
                         </div>
                     </div>
@@ -192,7 +192,11 @@
                 $("#edit_phone_number").val(response.phone_number);
                 $("#edit_address").val(response.address);
                 $("#edit_shop_name").val(response.shop_name);
-                $("#edit_opening_balance").val(response.ledger.opening_balance);
+                if (response.ledger) {
+                    $("#edit_opening_balance").val(response.ledger.opening_balance);
+                } else {
+                    $("#edit_opening_balance").val(0);
+                }
                 $("#edit_business_type").html('<option value="">Select Business Type</option>');
 
                 $.each(response.business_types, function (index, type) {
