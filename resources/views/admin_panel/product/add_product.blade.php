@@ -30,64 +30,66 @@
                             <strong>Success!</strong> {{ session('success') }}.
                         </div>
                     @endif
-                    <table class="table datanew">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Item Name</th>
-                                <th>Unit</th>
-                                <th>Purchase</th>
-                                <th>Sale</th>
-                                <th>Stock</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($products as $k => $p)
+                    <div class="table-responsive">
+                        <table class="table datanew">
+                            <thead>
                                 <tr>
-                                    <td>{{ $k + 1 }}</td>
-                                    <td>{{ $p->item_name }}</td>
-                                    <td>{{ $p->unit ?? '—' }}</td>
-                                    <td>Rs. {{ number_format($p->wholesale_price, 2) }}</td>
-                                    <td>Rs. {{ number_format($p->retail_price, 2) }}</td>
-                                    <td>
-                                        @php
-                                            $stock = $p->initial_stock ?? 0;
-                                            if ($stock <= 0) {
-                                                $badgeClass = 'badge bg-danger';
-                                            } elseif ($stock <= 10) {
-                                                $badgeClass = 'badge bg-warning';
-                                            } elseif ($stock <= 50) {
-                                                $badgeClass = 'badge bg-info';
-                                            } else {
-                                                $badgeClass = 'badge bg-success';
-                                            }
-                                        @endphp
-                                        <span class="{{ $badgeClass }} px-3 py-2">
-                                            {{ $stock }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary editProductBtn"
-                                                data-id="{{ $p->id }}"
-                                                data-name="{{ $p->item_name }}"
-                                                data-unit="{{ $p->unit }}"
-                                                data-wholesale="{{ $p->wholesale_price }}"
-                                                data-retail="{{ $p->retail_price }}"
-                                                data-stock="{{ $p->initial_stock ?? 0 }}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editProductModal">
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-sm btn-danger deleteProductBtn"
-                                                data-id="{{ $p->id }}">
-                                            Delete
-                                        </button>
-                                    </td>
+                                    <th>#</th>
+                                    <th>Item Name</th>
+                                    <th>Unit</th>
+                                    <th>Purchase</th>
+                                    <th>Sale</th>
+                                    <th>Stock</th>
+                                    <th>Action</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($products as $k => $p)
+                                    <tr>
+                                        <td>{{ $k + 1 }}</td>
+                                        <td>{{ $p->item_name }}</td>
+                                        <td>{{ $p->unit ?? '—' }}</td>
+                                        <td>Rs. {{ number_format($p->wholesale_price, 2) }}</td>
+                                        <td>Rs. {{ number_format($p->retail_price, 2) }}</td>
+                                        <td>
+                                            @php
+                                                $stock = $p->initial_stock ?? 0;
+                                                if ($stock <= 0) {
+                                                    $badgeClass = 'badge bg-danger';
+                                                } elseif ($stock <= 10) {
+                                                    $badgeClass = 'badge bg-warning';
+                                                } elseif ($stock <= 50) {
+                                                    $badgeClass = 'badge bg-info';
+                                                } else {
+                                                    $badgeClass = 'badge bg-success';
+                                                }
+                                            @endphp
+                                            <span class="{{ $badgeClass }} px-3 py-2">
+                                                {{ $stock }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary editProductBtn"
+                                                    data-id="{{ $p->id }}"
+                                                    data-name="{{ $p->item_name }}"
+                                                    data-unit="{{ $p->unit }}"
+                                                    data-wholesale="{{ $p->wholesale_price }}"
+                                                    data-retail="{{ $p->retail_price }}"
+                                                    data-stock="{{ $p->initial_stock ?? 0 }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editProductModal">
+                                                Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-danger deleteProductBtn"
+                                                    data-id="{{ $p->id }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
