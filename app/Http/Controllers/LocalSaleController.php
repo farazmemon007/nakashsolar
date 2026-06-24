@@ -46,6 +46,7 @@ class LocalSaleController extends Controller
         DB::beginTransaction();
 
         try {
+            $rawItemIds = $request->item_id;
             $rawItems = $request->item_name;
             $rawHeights = $request->height;
             $rawWidths = $request->width;
@@ -64,6 +65,7 @@ class LocalSaleController extends Controller
             }
 
             // Reconstruct arrays based on filtered indices
+            $itemIds = [];
             $items = [];
             $heights = [];
             $widths = [];
@@ -74,6 +76,7 @@ class LocalSaleController extends Controller
             $amounts = [];
 
             foreach ($filteredIndices as $i) {
+                $itemIds[] = $rawItemIds[$i] ?? null;
                 $items[] = $rawItems[$i];
                 $heights[] = $rawHeights[$i] ?? null;
                 $widths[] = $rawWidths[$i] ?? null;
@@ -100,6 +103,7 @@ class LocalSaleController extends Controller
 
             $sale = LocalSale::create([
                 'admin_or_user_id' => $userId,
+                'sale_type' => $request->sale_type ?? 'estimate',
                 'invoice_number' => LocalSale::generateSaleInvoiceNo(),
                 'sale_date' => $request->sale_date ?? now(),
 
@@ -125,10 +129,41 @@ class LocalSaleController extends Controller
                 'net_amount' => $netAmount,
                 'advance_amount' => $advance,
                 'remaining_amount' => $remaining,
-                'job_status' => 'pending',
-                'delivery_date' => $request->delivery_date,
-                'notify_days_before' => $request->notify_days_before ?? 2,
+                'job_status' => ($request->sale_type === 'sale') ? 'completed' : 'pending',
+                'delivery_date' => ($request->sale_type === 'sale') ? null : $request->delivery_date,
+                'notify_days_before' => ($request->sale_type === 'sale') ? 0 : ($request->notify_days_before ?? 2),
             ]);
+
+            // Automatically reduce stock if it's a direct Sale
+            if ($request->sale_type === 'sale') {
+                foreach ($items as $index => $itemName) {
+                    $productId = isset($itemIds[$index]) ? intval($itemIds[$index]) : null;
+                    if ($productId) {
+                        $productModel = Product::find($productId);
+                        if ($productModel) {
+                            $openingStock = floatval($productModel->initial_stock ?? 0);
+                            $usedStock = floatval($qtys[$index] ?? 0);
+                            $closingStock = max($openingStock - $usedStock, 0);
+
+                            // Create StockOut record
+                            \App\Models\StockOut::create([
+                                'admin_or_user_id' => $userId,
+                                'product_id' => $productId,
+                                'local_sales_id' => $sale->id,
+                                'current_stock' => $openingStock,    // Opening Stock
+                                'close_stock' => $closingStock,      // Closing Stock (Remaining)
+                                'total_stock' => $usedStock,         // Used Stock
+                                'created_at' => \Carbon\Carbon::now(),
+                                'updated_at' => \Carbon\Carbon::now(),
+                            ]);
+
+                            // Update product's initial_stock with the closing stock
+                            $productModel->initial_stock = $closingStock;
+                            $productModel->save();
+                        }
+                    }
+                }
+            }
 
             // Update Customer Ledger: Previous + Remaining = New Closing
             if ($partyType === 'customer' && $remaining > 0) {

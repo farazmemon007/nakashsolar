@@ -135,10 +135,19 @@
                 @csrf
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">🧾 Job Order</h4>
-                    <div style="max-width: 260px;">
-                        <label class="small text-muted">Sale Date & Time</label>
-                        <input type="datetime-local" name="sale_date" class="form-control form-control-sm" value="{{ old('sale_date', date('Y-m-d\TH:i')) }}">
+                    <h4 class="mb-0">🧾 Job Order / Sale</h4>
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="sale_type" id="sale_type_estimate" value="estimate" checked autocomplete="off">
+                            <label class="btn btn-outline-primary px-3" for="sale_type_estimate">Estimate</label>
+
+                            <input type="radio" class="btn-check" name="sale_type" id="sale_type_sale" value="sale" autocomplete="off">
+                            <label class="btn btn-outline-primary px-3" for="sale_type_sale">Sale</label>
+                        </div>
+                        <div style="max-width: 260px;">
+                            <label class="small text-muted d-block mb-0">Sale Date & Time</label>
+                            <input type="datetime-local" name="sale_date" class="form-control form-control-sm" value="{{ old('sale_date', date('Y-m-d\TH:i')) }}">
+                        </div>
                     </div>
                 </div>
 
@@ -276,7 +285,7 @@
                     </div>
                 </div>
 
-                <div class="card mb-3">
+                <div class="card mb-3" id="deliveryPaymentPanel">
                     <div class="card-body">
                         <h6 class="mb-3 fw-bold text-primary">Delivery & Payment Details</h6>
                         <div class="row g-3 mb-3">
@@ -320,7 +329,7 @@
                 </div>
 
                 <input type="hidden" name="net_amount" id="netAmount">
-                <button class="btn btn-primary">Save Job Order</button>
+                <button class="btn btn-primary btn-save-order">Save Job Order</button>
             </form>
         </div>
     </div>
@@ -520,6 +529,27 @@
     $(document).ready(function() {
         updateRowNumbers();
         calcGrand();
+
+        // Sale/Estimate toggle logic
+        function handleSaleTypeToggle() {
+            let saleType = $('input[name="sale_type"]:checked').val();
+            if (saleType === 'sale') {
+                $('#deliveryPaymentPanel').hide();
+                $('[name="delivery_date"]').prop('required', false).val('');
+                $('[name="notify_days_before"]').val('');
+                $('.btn-save-order').text('Save Sale');
+            } else {
+                $('#deliveryPaymentPanel').show();
+                $('[name="delivery_date"]').prop('required', true);
+                if (!$('[name="notify_days_before"]').val()) {
+                    $('[name="notify_days_before"]').val('2');
+                }
+                $('.btn-save-order').text('Save Job Order');
+            }
+        }
+
+        $('input[name="sale_type"]').on('change', handleSaleTypeToggle);
+        handleSaleTypeToggle(); // Run on load
 
         // Populate phone/address from old selection
         let selCust = $('#customer').find('option:selected');
