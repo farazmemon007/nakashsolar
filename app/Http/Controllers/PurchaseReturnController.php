@@ -11,13 +11,111 @@ use Illuminate\Support\Facades\Auth;
 
 class PurchaseReturnController extends Controller
 {
-
-    public function showReturnForm($id)
+    public function showReturnForm($id = null)
     {
-        $purchase = Purchase::with('vendor')->findOrFail($id);
-
-        // Decode JSON fields
+        $purchase = null;
+        if ($id) {
+            $purchase = Purchase::with('vendor')->findOrFail($id);
+        }
         return view('admin_panel.purchase_return.purcahse_return', compact('purchase'));
+    }
+
+    public function getPurchaseInvoices(Request $request)
+    {
+        $userId = Auth::id();
+        $date = $request->get('date');
+        $search = trim($request->get('search', ''));
+
+        $query = Purchase::with('vendor')->where('admin_or_user_id', $userId);
+
+        if ($date) {
+            $query->whereDate('purchase_date', $date);
+        }
+
+        if ($search !== '') {
+            $query->where('invoice_number', 'like', '%' . $search . '%');
+        }
+
+        $purchases = $query->orderBy('id', 'desc')->get();
+
+        $result = $purchases->map(function ($purchase) {
+            return [
+                'id' => $purchase->id,
+                'invoice_number' => $purchase->invoice_number,
+                'vendor_name' => $purchase->vendor->Party_name ?? 'N/A',
+                'party_name' => $purchase->party_name, // vendor_id
+                'label' => $purchase->invoice_number . ' (' . ($purchase->vendor->Party_name ?? 'N/A') . ')',
+            ];
+        });
+
+        return response()->json($result);
+    }
+
+    private function getReturnedQuantities($purchaseId)
+    {
+        $returns = PurchaseReturn::where('purchase_id', $purchaseId)->get();
+        $returnedTotals = [];
+
+        foreach ($returns as $ret) {
+            $items = json_decode($ret->item ?? '[]', true) ?: [];
+            $qtys = json_decode($ret->return_qty ?? '[]', true) ?: [];
+            foreach ($items as $idx => $itemName) {
+                $qty = (float)($qtys[$idx] ?? 0);
+                if (isset($returnedTotals[$itemName])) {
+                    $returnedTotals[$itemName] += $qty;
+                } else {
+                    $returnedTotals[$itemName] = $qty;
+                }
+            }
+        }
+        return $returnedTotals;
+    }
+
+    public function fetchPurchaseDetails(Request $request)
+    {
+        $id = $request->input('id');
+        $purchase = Purchase::with('vendor')->find($id);
+
+        if (!$purchase) {
+            return response()->json(['success' => false, 'message' => 'Purchase invoice not found.']);
+        }
+
+        $returnedQtys = $this->getReturnedQuantities($purchase->id);
+
+        $items = is_string($purchase->item) ? (json_decode($purchase->item, true) ?? []) : ($purchase->item ?? []);
+        $rates = is_string($purchase->rate) ? (json_decode($purchase->rate, true) ?? []) : ($purchase->rate ?? []);
+        $pcs = is_string($purchase->pcs) ? (json_decode($purchase->pcs, true) ?? []) : ($purchase->pcs ?? []);
+        $discounts = is_string($purchase->discount) ? (json_decode($purchase->discount, true) ?? []) : ($purchase->discount ?? []);
+
+        $lines = [];
+        foreach ($items as $index => $item) {
+            $purchasedQty = (float)($pcs[$index] ?? 0);
+            $alreadyReturned = (float)($returnedQtys[$item] ?? 0);
+            $availableQty = max(0, $purchasedQty - $alreadyReturned);
+
+            $lines[] = [
+                'index' => $index,
+                'item' => $item,
+                'rate' => (float)($rates[$index] ?? 0),
+                'discount' => (float)($discounts[$index] ?? 0),
+                'purchased_qty' => $purchasedQty,
+                'already_returned' => $alreadyReturned,
+                'available_qty' => $availableQty,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'purchase' => [
+                'id' => $purchase->id,
+                'invoice_number' => $purchase->invoice_number,
+                'purchase_date' => $purchase->purchase_date,
+                'party_name' => $purchase->party_name,
+                'vendor_name' => $purchase->vendor->Party_name ?? 'N/A',
+                'grand_total' => $purchase->grand_total,
+            ],
+            'items' => $lines
+        ]);
     }
 
     public function store(Request $request)
@@ -32,6 +130,12 @@ class PurchaseReturnController extends Controller
         $discounts = $request->discount ?? [];
         $returnAmounts = $request->return_amount ?? [];
 
+        // Server-side validation of return quantities against available
+        $returnedQtys = $this->getReturnedQuantities($purchaseId);
+        $purchase = Purchase::findOrFail($purchaseId);
+        $purchaseItems = is_string($purchase->item) ? (json_decode($purchase->item, true) ?? []) : ($purchase->item ?? []);
+        $purchasePcs = is_string($purchase->pcs) ? (json_decode($purchase->pcs, true) ?? []) : ($purchase->pcs ?? []);
+
         $rows = [];
         $totalReturnAmount = 0;
 
@@ -42,6 +146,20 @@ class PurchaseReturnController extends Controller
 
             // Only process rows with valid data
             if (trim($itemName) !== '' && $qty > 0 && $amount > 0) {
+                // Find matching item in purchase for stock validation
+                $foundIndex = array_search($itemName, $purchaseItems);
+                if ($foundIndex === false) {
+                    return redirect()->back()->with('error', "Item '$itemName' not found on the original purchase invoice.");
+                }
+
+                $purchasedQty = (float)($purchasePcs[$foundIndex] ?? 0);
+                $alreadyReturned = (float)($returnedQtys[$itemName] ?? 0);
+                $availableQty = $purchasedQty - $alreadyReturned;
+
+                if ($qty > $availableQty) {
+                    return redirect()->back()->with('error', "Return quantity for '$itemName' ($qty) exceeds available quantity ($availableQty).");
+                }
+
                 $rows[] = [
                     'item' => $itemName,
                     'rate' => $rates[$i] ?? 0,
@@ -71,15 +189,14 @@ class PurchaseReturnController extends Controller
             'return_amount' => json_encode(array_column($rows, 'return_amount')),
             'total_return_amount' => $totalReturnAmount,
             'return_items' => implode(', ', array_column($rows, 'item')),
+            'reason' => $request->reason,
+            'notes' => $request->notes,
         ]);
 
         // Step 2: Update return status in purchase
         Purchase::where('id', $purchaseId)->update(['return_status' => 1]);
 
-        // Step 3: No stock tracking for simplified products
-        // Stock management removed as per simplified product structure
-
-        // Step 4: Update closing_balance of vendor
+        // Step 3: Update closing_balance of vendor
         $vendorId = $request->party_name; // vendor_id
         $vendorLedger = VendorLedger::where('vendor_id', $vendorId)->first();
 
@@ -88,11 +205,8 @@ class PurchaseReturnController extends Controller
             $vendorLedger->save();
         }
 
-        return redirect()->route('all-Purchases')->with('success', 'Purchase return processed successfully.');
-        // return redirect()->back()->with('success', 'Purchase return saved, stock updated, and vendor ledger adjusted successfully.');
+        return redirect()->route('all-purchase-return')->with('success', 'Purchase return processed successfully.');
     }
-
-
 
     public function all_purchase_return()
     {

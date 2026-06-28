@@ -146,7 +146,9 @@ Route::get('/purchase/edit/{id}', [PurchaseController::class, 'purchaseedit'])->
 Route::put('/purchase/update/{id}', [PurchaseController::class, 'update_purchase'])->name('update-Purchase');
 Route::delete('/purchase/delete/{id}', [PurchaseController::class, 'delete_purchase'])->name('purchase.delete');
 
-Route::get('/purchase-return/{id}', [PurchaseReturnController::class, 'showReturnForm'])->name('purchase.return.form');
+Route::get('/purchase-return/{id?}', [PurchaseReturnController::class, 'showReturnForm'])->name('purchase.return.form');
+Route::get('/get-purchase-invoices', [PurchaseReturnController::class, 'getPurchaseInvoices'])->name('get-purchase-invoices');
+Route::get('/fetch-purchase-details', [PurchaseReturnController::class, 'fetchPurchaseDetails'])->name('fetch-purchase-details');
 Route::post('/purchase-return/store', [PurchaseReturnController::class, 'store'])->name('purchase.return.store');
 Route::get('/all-purchase-return', [PurchaseReturnController::class, 'all_purchase_return'])->name('all-purchase-return');
 

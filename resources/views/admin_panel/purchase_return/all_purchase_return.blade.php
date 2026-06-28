@@ -4,11 +4,14 @@
     @include('admin_panel.include.admin_sidebar_include')
     <div class="page-wrapper">
         <div class="content">
-            <div class="page-header d-flex justify-content-between align-items-center">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
                 <div class="page-title">
                     <h4>Purchase Returns</h4>
                     <h6>View all purchase return records</h6>
                 </div>
+                <a href="{{ route('purchase.return.form') }}" class="btn btn-primary shadow-sm">
+                    <i class="fa fa-plus me-1"></i>Add Purchase Return
+                </a>
             </div>
 
             <div class="card shadow-sm">

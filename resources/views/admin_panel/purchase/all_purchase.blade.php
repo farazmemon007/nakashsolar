@@ -226,11 +226,9 @@
                                                 <a href="{{ route('purchase.edit', $purchase->id) }}" class="btn btn-warning" title="Edit">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
-                                                @if($purchase->return_status != 1)
-                                                    <a href="{{ route('purchase.return.form', $purchase->id) }}" class="btn btn-danger" title="Return">
-                                                        <i class="fa fa-undo"></i>
-                                                    </a>
-                                                @endif
+                                                 <a href="{{ route('purchase.return.form', $purchase->id) }}" class="btn btn-danger" title="Return">
+                                                     <i class="fa fa-undo"></i>
+                                                 </a>
                                                 <form action="{{ route('purchase.delete', $purchase->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this purchase? This will reverse stock and ledger entries.');">
                                                     @csrf
                                                     @method('DELETE')
