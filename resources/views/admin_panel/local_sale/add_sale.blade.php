@@ -326,7 +326,7 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label>Advance</label>
+                                <label id="advanceLabel">Advance</label>
                                 <input id="advance" name="advance_amount" class="form-control" value="{{ old('advance_amount') }}">
                             </div>
 
@@ -389,6 +389,7 @@
         $('.readonly-wrap').addClass('d-none');
 
         $('#advance').prop('readonly', false);
+        $('#advanceLabel').text('Advance');
         $('#remaining').closest('.col-md-3').removeClass('d-none');
 
         if (t === 'customer') {
@@ -404,6 +405,7 @@
         if (t === 'walkin') {
             $('#walkinName,#walkinPhone,#walkinAddress').removeClass('d-none');
             $('#advance').val($('#grandTotal').val()).prop('readonly', true);
+            $('#advanceLabel').text('Paid Amount');
             $('#remaining').val('0');
             $('#remaining').closest('.col-md-3').addClass('d-none');
         }

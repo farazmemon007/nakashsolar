@@ -379,7 +379,7 @@
                 <span>RS {{ number_format($sale->net_amount, 2) }}</span>
             </div>
             <div class="total-row">
-                <span>Advance Paid</span>
+                <span>{{ $sale->party_type === 'walkin' ? 'Amount Paid' : 'Advance Paid' }}</span>
                 <span>{{ number_format($sale->advance_amount, 2) }}</span>
             </div>
             <div class="total-row balance-due">
