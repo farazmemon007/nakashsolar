@@ -322,14 +322,24 @@ class JobOrderController extends Controller
             $relatedJobs = JobOrder::where('sale_id', $sale->id)->get();
             $assignedMap = [];
             foreach ($relatedJobs as $job) {
-                $workTypes = json_decode($job->work_type, true) ?? [];
-                foreach ($workTypes as $wt) {
-                    if (isset($wt['items']) && is_array($wt['items'])) {
-                        foreach ($wt['items'] as $i) {
-                            $n = $i['name'];
-                            $q = (float) $i['qty'];
-                            if (!isset($assignedMap[$n])) $assignedMap[$n] = 0;
-                            $assignedMap[$n] += $q;
+                $jobItems = json_decode($job->items_json, true);
+                if ($jobItems && is_array($jobItems)) {
+                    foreach ($jobItems as $item) {
+                        $n = $item['name'];
+                        $q = (float) $item['qty'];
+                        if (!isset($assignedMap[$n])) $assignedMap[$n] = 0;
+                        $assignedMap[$n] += $q;
+                    }
+                } else {
+                    $workTypes = json_decode($job->work_type, true) ?? [];
+                    foreach ($workTypes as $wt) {
+                        if (isset($wt['items']) && is_array($wt['items'])) {
+                            foreach ($wt['items'] as $i) {
+                                $n = $i['name'];
+                                $q = (float) $i['qty'];
+                                if (!isset($assignedMap[$n])) $assignedMap[$n] = 0;
+                                $assignedMap[$n] += $q;
+                            }
                         }
                     }
                 }
@@ -502,17 +512,30 @@ class JobOrderController extends Controller
         $workTypeData    = json_decode($job->work_type, true) ?? [];
         $itemsCollection = collect();
 
-        foreach ($workTypeData as $wt) {
-            $wtName = $wt['name'] ?? 'Main';
-            $items  = $wt['items'] ?? [];
-            foreach ($items as $it) {
+        if (empty($workTypeData) && $job->items_json) {
+            $flatItems = json_decode($job->items_json, true) ?? [];
+            foreach ($flatItems as $it) {
                 $itemsCollection->push((object) [
-                    'work_type' => $wtName,
+                    'work_type' => 'Main',
                     'item_name' => $it['name'] ?? 'N/A',
-                    'qty'       => $it['qty'] ?? 0,
-                    'rate'      => $it['rate'] ?? 0,
-                    'total'     => ($it['qty'] ?? 0) * ($it['rate'] ?? 0),
+                    'qty'       => (float) ($it['qty'] ?? 0),
+                    'rate'      => (float) ($it['rate'] ?? 0),
+                    'total'     => ((float) ($it['qty'] ?? 0)) * ((float) ($it['rate'] ?? 0)),
                 ]);
+            }
+        } else {
+            foreach ($workTypeData as $wt) {
+                $wtName = $wt['name'] ?? 'Main';
+                $items  = $wt['items'] ?? [];
+                foreach ($items as $it) {
+                    $itemsCollection->push((object) [
+                        'work_type' => $wtName,
+                        'item_name' => $it['name'] ?? 'N/A',
+                        'qty'       => (float) ($it['qty'] ?? 0),
+                        'rate'      => (float) ($it['rate'] ?? 0),
+                        'total'     => ((float) ($it['qty'] ?? 0)) * ((float) ($it['rate'] ?? 0)),
+                    ]);
+                }
             }
         }
 
@@ -593,23 +616,47 @@ class JobOrderController extends Controller
         if ($job->sale) {
             $sale = $job->sale;
 
+            $name    = $request->walkin_name ?? $request->party_name ?? $request->shop_name;
+            $phone   = $request->customer_phone ?? $request->phone;
+            $address = $request->customer_address ?? $request->address;
+
+            if ($request->has('party_type')) {
+                $sale->party_type = $request->party_type;
+                if ($request->party_type === 'customer') {
+                    $sale->customer_id = $request->customer_id;
+                    $sale->vendor_id = null;
+                    $sale->customer_shopname = null;
+                } elseif ($request->party_type === 'vendor') {
+                    $sale->vendor_id = $request->vendor_id;
+                    $sale->customer_id = null;
+                    $sale->customer_shopname = null;
+                } else { // walkin
+                    $sale->customer_id = null;
+                    $sale->vendor_id = null;
+                    $sale->customer_shopname = $name;
+                }
+                $sale->save();
+            }
+
+            $sale->refresh();
+
             if ($sale->party_type === 'customer' && $sale->customer) {
-                $sale->customer->customer_name = $request->walkin_name;
-                $sale->customer->phone_number  = $request->customer_phone;
-                $sale->customer->address       = $request->customer_address;
+                $sale->customer->customer_name = $name;
+                $sale->customer->phone_number  = $phone;
+                $sale->customer->address       = $address;
                 $sale->customer->save();
 
             } elseif ($sale->party_type === 'vendor' && $sale->vendor) {
-                $sale->vendor->Party_name    = $request->walkin_name;
-                $sale->vendor->Party_phone   = $request->customer_phone;
-                $sale->vendor->Party_address = $request->customer_address;
+                $sale->vendor->Party_name    = $name;
+                $sale->vendor->Party_phone   = $phone;
+                $sale->vendor->Party_address = $address;
                 $sale->vendor->save();
 
             } else {
                 // Walk-in: stored directly on the sale
-                $sale->customer_shopname = $request->walkin_name;
-                $sale->customer_phone    = $request->customer_phone;
-                $sale->customer_address  = $request->customer_address;
+                $sale->customer_shopname = $name;
+                $sale->customer_phone    = $phone;
+                $sale->customer_address  = $address;
                 $sale->save();
             }
         }

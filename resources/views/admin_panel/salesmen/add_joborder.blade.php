@@ -339,7 +339,19 @@
                                                 <tbody>
                                                 @foreach($group['jobs'] as $gIdx => $job)
                                                     @php
-                                                        $jobItems = json_decode($job->items_json, true) ?? [];
+                                                        $jobItems = json_decode($job->items_json, true);
+                                     if (empty($jobItems) && $job->work_type) {
+                                         $workTypes = json_decode($job->work_type, true) ?? [];
+                                         $jobItems = [];
+                                         foreach ($workTypes as $wt) {
+                                             if (isset($wt['items']) && is_array($wt['items'])) {
+                                                 foreach ($wt['items'] as $item) {
+                                                     $jobItems[] = $item;
+                                                 }
+                                             }
+                                         }
+                                     }
+                                     $jobItems = $jobItems ?? [];
                                                         $itemNames = collect($jobItems)->pluck('name')->implode(', ');
                                                     @endphp
                                                     <tr>
@@ -515,12 +527,24 @@
                                     $aType      = $assign['assignee_type'];
                                     $aName      = $assign['assignee_name'];
                                     $typeColors = [
-                                        'contractor' => ['bg'=>'#fff8f1','border'=>'#ff9f43','badge'=>'warning','icon'=>'fa-briefcase','label'=>'Contractor'],
+                                                        'contractor' => ['bg'=>'#fff8f1','border'=>'#ff9f43','badge'=>'warning','icon'=>'fa-briefcase','label'=>'Contractor'],
                                         'vendor'     => ['bg'=>'#e8f9fd','border'=>'#00cfe8','badge'=>'info','icon'=>'fa-truck','label'=>'Vendor'],
                                         'inhouse'    => ['bg'=>'#f0fdf4','border'=>'#28c76f','badge'=>'success','icon'=>'fa-user','label'=>'In-House'],
                                     ];
                                     $tc = $typeColors[$aType] ?? $typeColors['inhouse'];
-                                    $jobItems = json_decode($job->items_json, true) ?? [];
+                                    $jobItems = json_decode($job->items_json, true);
+                                    if (empty($jobItems) && $job->work_type) {
+                                        $workTypes = json_decode($job->work_type, true) ?? [];
+                                        $jobItems = [];
+                                        foreach ($workTypes as $wt) {
+                                            if (isset($wt['items']) && is_array($wt['items'])) {
+                                                foreach ($wt['items'] as $item) {
+                                                    $jobItems[] = $item;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    $jobItems = $jobItems ?? [];
                                 @endphp
                                 <div class="mx-3 mb-3 {{ $aIdx === 0 ? 'mt-3' : '' }} p-3 rounded-3"
                                      style="background: {{ $tc['bg'] }}; border-left: 4px solid {{ $tc['border'] }};">
@@ -638,7 +662,27 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($jobOrders as $key => $job)
+                                 @foreach($jobOrders as $key => $job)
+                                    @php
+                                        $resolvedShopName = '';
+                                        $resolvedPhone = '';
+                                        $resolvedAddress = '';
+                                        if ($job->sale) {
+                                            if ($job->sale->party_type === 'customer' && $job->sale->customer) {
+                                                $resolvedShopName = $job->sale->customer->customer_name ?? $job->sale->customer->shop_name ?? '';
+                                                $resolvedPhone = $job->sale->customer->phone_number ?? '';
+                                                $resolvedAddress = $job->sale->customer->address ?? '';
+                                            } elseif ($job->sale->party_type === 'vendor' && $job->sale->vendor) {
+                                                $resolvedShopName = $job->sale->vendor->Party_name ?? '';
+                                                $resolvedPhone = $job->sale->vendor->Party_phone ?? '';
+                                                $resolvedAddress = $job->sale->vendor->Party_address ?? '';
+                                            } else {
+                                                $resolvedShopName = $job->sale->customer_shopname ?? '';
+                                                $resolvedPhone = $job->sale->customer_phone ?? '';
+                                                $resolvedAddress = $job->sale->customer_address ?? '';
+                                            }
+                                        }
+                                    @endphp
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td><strong class="text-primary">{{ $job->job_order_number }}</strong></td>
@@ -720,13 +764,13 @@
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
-
+ 
                                         <td>
                                             <a href="{{ route('job-orders.show', $job->id) }}"
                                                 class="btn btn-sm btn-info" title="View Details">
-                                                <i class="fa fa-eye"></i> View
+                                                    <i class="fa fa-eye"></i> View
                                             </a>
-
+ 
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
                                                     <i class="fa fa-ellipsis-v"></i> More
@@ -748,9 +792,9 @@
                                                            data-party-type="{{ $job->sale->party_type ?? 'walkin' }}"
                                                            data-vendor-id="{{ $job->sale->vendor_id ?? '' }}"
                                                            data-customer-id="{{ $job->sale->customer_id ?? '' }}"
-                                                           data-shop-name="{{ $job->sale->customer_shopname ?? '' }}"
-                                                           data-phone="{{ $job->sale->customer_phone ?? '' }}"
-                                                           data-address="{{ $job->sale->customer_address ?? '' }}"
+                                                           data-shop-name="{{ $resolvedShopName }}"
+                                                           data-phone="{{ $resolvedPhone }}"
+                                                           data-address="{{ $resolvedAddress }}"
                                                            data-bs-toggle="modal"
                                                            data-bs-target="#editJobModal">
                                                             <i class="fa fa-edit me-2"></i>Edit Amount
@@ -795,7 +839,6 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <label class="fw-bold small">Select Customer Order</label>
-                                <input type="text" id="jobSearch" class="form-control mb-2" placeholder="Search ordePKR..">
                                 <select class="form-select" id="jobSelect">
                                     <option value="">-- Choose Order --</option>
                                     @foreach($localSales as $sale)
@@ -895,7 +938,12 @@
                         <select class="form-select" name="vendor_id" id="editVendorId">
                             <option value="">Select Vendor</option>
                             @foreach($vendors as $vendor)
-                                <option value="{{ $vendor->id }}">{{ $vendor->Party_name }}</option>
+                                <option value="{{ $vendor->id }}" 
+                                        data-name="{{ $vendor->Party_name }}"
+                                        data-phone="{{ $vendor->Party_phone }}"
+                                        data-address="{{ $vendor->Party_address }}">
+                                    {{ $vendor->Party_name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -904,7 +952,12 @@
                         <select class="form-select" name="customer_id" id="editCustomerId">
                             <option value="">Select Customer</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->customer_name ?? $customer->shop_name }}</option>
+                                <option value="{{ $customer->id }}"
+                                        data-name="{{ $customer->customer_name ?? $customer->shop_name }}"
+                                        data-phone="{{ $customer->phone_number }}"
+                                        data-address="{{ $customer->address }}">
+                                    {{ $customer->customer_name ?? $customer->shop_name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -938,6 +991,11 @@
 @include('admin_panel.include.footer_include')
 
 <script>
+    // Suppress duplicate DataTable initialization warnings
+    if ($.fn.dataTable) {
+        $.fn.dataTable.ext.errMode = 'none';
+    }
+
     // ============================================================
     // View Switch: Table View <-> Grouped Assignee View <-> Job View
     // ============================================================
@@ -1102,15 +1160,6 @@
     let currentSaleItems = [];
 
     $(document).ready(function () {
-
-        // Filter dropdown when typing
-        $("#jobSearch").on('input', function() {
-            let term = $(this).val().toLowerCase();
-            $('#jobSelect option').each(function() {
-                let txt = $(this).text().toLowerCase();
-                $(this).toggle(txt.indexOf(term) !== -1);
-            });
-        });
 
         // Load Order Items
         $("#jobSelect").change(function () {
@@ -1534,9 +1583,8 @@
         // Status dropdown removed from this page
 
         // Populate Edit Modal
-        <script>
-    // Populate Edit Modal with job details
-    $(document).on("click", ".editJobBtn", function() {
+        // Populate Edit Modal with job details
+        $(document).on("click", ".editJobBtn", function() {
         let id = $(this).data('id');
         let jobNo = $(this).data('job-no');
         let date = $(this).data('date');
@@ -1593,7 +1641,48 @@
 
     // Change handler for Party Type dropdown in modal
     $("#editPartyType").on('change', function() {
-        togglePartyFields($(this).val());
+        let type = $(this).val();
+        togglePartyFields(type);
+        if (type === 'walkin') {
+            $("#editPartyName").val('');
+            $("#editShopName").val('');
+            $("#editPhone").val('');
+            $("#editAddress").val('');
+        } else if (type === 'customer') {
+            $("#editCustomerId").val('').trigger('change');
+        } else if (type === 'vendor') {
+            $("#editVendorId").val('').trigger('change');
+        }
+    });
+
+    $("#editCustomerId").on('change', function() {
+        let opt = $(this).find('option:selected');
+        if (opt.val()) {
+            $("#editPartyName").val(opt.data('name') || '');
+            $("#editPhone").val(opt.data('phone') || '');
+            $("#editAddress").val(opt.data('address') || '');
+        } else {
+            $("#editPartyName").val('');
+            $("#editPhone").val('');
+            $("#editAddress").val('');
+        }
+    });
+
+    $("#editVendorId").on('change', function() {
+        let opt = $(this).find('option:selected');
+        if (opt.val()) {
+            $("#editPartyName").val(opt.data('name') || '');
+            $("#editPhone").val(opt.data('phone') || '');
+            $("#editAddress").val(opt.data('address') || '');
+        } else {
+            $("#editPartyName").val('');
+            $("#editPhone").val('');
+            $("#editAddress").val('');
+        }
+    });
+
+    $("#editShopName").on('input', function() {
+        $("#editPartyName").val($(this).val());
     });
 
          // Delete
