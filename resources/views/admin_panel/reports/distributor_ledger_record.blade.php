@@ -83,7 +83,7 @@
                             </tr>
                             <tr>
                                 <td colspan="5" class="opening-balance">Opening Balance:</td>
-                                <td id="openingBalance">Rs. 0</td>
+                                <td id="openingBalance">PKR 0</td>
                             </tr>
                         </thead>
                         <tbody id="ledgerData"></tbody>
@@ -169,7 +169,7 @@
         <td class="fw-bold">Opening Balance</td>
         <td>-</td>
         <td>-</td>
-        <td class="fw-bold text-primary">Rs. ${balance.toFixed(2)}</td>
+        <td class="fw-bold text-primary">PKR ${balance.toFixed(2)}</td>
     </tr>
 `;
 
@@ -217,7 +217,7 @@
                     });
 
                     // Transfer Entries
-                    response.transfers.forEach(entry => {
+                    response.transfePKRforEach(entry => {
                         allEntries.push({
                             date: entry.transfer_date,
                             type: 'transfer',
@@ -239,9 +239,9 @@
                 <td>${formatDate(entry.date)}</td>
                 <td>${entry.invoice_number}</td>
                 <td>To Sale A/c (${entry.booker})</td>
-                <td>Rs. ${debit.toFixed(2)}</td>
+                <td>PKR ${debit.toFixed(2)}</td>
                 <td>-</td>
-                <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
             </tr>
         `;
                         } else if (entry.type === 'recovery') {
@@ -254,8 +254,8 @@
                 <td>-</td>
                 <td>${entry.remarks} </td>
                 <td>-</td>
-                <td>Rs. ${credit.toFixed(2)}</td>
-                <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                <td>PKR ${credit.toFixed(2)}</td>
+                <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
             </tr>
         `;
                         } else if (entry.type === 'sale_return') {
@@ -268,8 +268,8 @@
             <td>${entry.invoice_number}</td>
             <td class="text-danger fw-bold">Sale Return</td>
             <td>-</td>
-            <td class="text-danger fw-bold">Rs. ${credit.toFixed(2)}</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+            <td class="text-danger fw-bold">PKR ${credit.toFixed(2)}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
         </tr>
     `;
                         } else if (entry.type === 'transfer') {
@@ -281,9 +281,9 @@
             <td>${formatDate(entry.date)}</td>
             <td>-</td>
             <td>Balance Transfer from ${entry.from} (${entry.reason || ''})</td>
-            <td>Rs. ${debit.toFixed(2)}</td>
+            <td>PKR ${debit.toFixed(2)}</td>
             <td>-</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
         </tr>
     `;
                         }
@@ -292,12 +292,12 @@
 
                     // ✅ Update Totals
                     $('#ledgerData').html(ledgerHTML);
-                    $('#openingBalance').text(`Rs. ${openingBalance.toFixed(2)}`);
-                    $('#totalDebit').text(`Rs. ${totalDebit.toFixed(2)}`);
-                    $('#totalCredit').text(`Rs. ${totalCredit.toFixed(2)}`);
+                    $('#openingBalance').text(`PKR ${openingBalance.toFixed(2)}`);
+                    $('#totalDebit').text(`PKR ${totalDebit.toFixed(2)}`);
+                    $('#totalCredit').text(`PKR ${totalCredit.toFixed(2)}`);
 
                     // Closing balance directly from API response
-                    $('#closingBalance').text(`Rs. ${parseFloat(response.closing_balance).toFixed(2)}`);
+                    $('#closingBalance').text(`PKR ${parseFloat(response.closing_balance).toFixed(2)}`);
 
                 }
             });

@@ -117,7 +117,7 @@
                                         <p>Vendor Name</p>
                                     </div>
                                     <div class="col-md-2">
-                                        <h5 id="info-grand-total">Rs. {{ $purchase ? number_format($purchase->grand_total, 0) : '0' }}</h5>
+                                        <h5 id="info-grand-total">PKR {{ $purchase ? number_format($purchase->grand_total, 0) : '0' }}</h5>
                                         <p>Grand Total</p>
                                     </div>
                                 </div>
@@ -215,7 +215,7 @@
                                         <tr>
                                             <th colspan="7" class="text-end">Total Return Amount:</th>
                                             <th class="text-center">
-                                                <input type="text" id="grand_total" class="form-control fw-bold text-danger text-center" readonly value="Rs. 0.00">
+                                                <input type="text" id="grand_total" class="form-control fw-bold text-danger text-center" readonly value="PKR 0.00">
                                             </th>
                                         </tr>
                                     </tfoot>
@@ -330,7 +330,7 @@
                         
                         $('#info-purchase-date').text(dateFormatted);
                         $('#info-vendor-name').text(response.purchase.vendor_name);
-                        $('#info-grand-total').text('Rs. ' + parseFloat(response.purchase.grand_total).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}));
+                        $('#info-grand-total').text('PKR ' + parseFloat(response.purchase.grand_total).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}));
 
                         // Populate rows
                         let tbody = '';
@@ -380,7 +380,7 @@
                         });
 
                         $('#items-tbody').html(tbody);
-                        $('#grand_total').val('Rs. 0.00');
+                        $('#grand_total').val('PKR 0.00');
 
                         // Show sections
                         $('#invoice-info-section, #items-table-section').removeClass('d-none');
@@ -439,7 +439,7 @@
             $('.return-amount').each(function() {
                 total += parseFloat($(this).val()) || 0;
             });
-            $('#grand_total').val('Rs. ' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            $('#grand_total').val('PKR ' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
         }
 
         // Form submission confirmation

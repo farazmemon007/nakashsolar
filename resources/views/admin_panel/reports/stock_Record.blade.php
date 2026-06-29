@@ -94,7 +94,7 @@
                     <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border">
                         <div>
                             <span class="text-muted fw-bold">Stock Summary:</span>
-                            <span class="ms-3 text-secondary">Total Stock Value: <span class="text-primary fw-bold">Rs. <span id="grand_total_value">0.00</span></span></span>
+                            <span class="ms-3 text-secondary">Total Stock Value: <span class="text-primary fw-bold">PKR <span id="grand_total_value">0.00</span></span></span>
                         </div>
                     </div>
                 </div>
@@ -161,8 +161,8 @@
                                 <td class="stock-plus">${item.total_stock_in ?? 0}</td>
                                 <td class="stock-minus">${item.total_stock_out ?? 0}</td>
                                 <td><span class="balance-box">${item.balance_stock ?? 0}</span></td>
-                                <td>Rs. ${Number(item.avg_purchase_rate ?? 0).toLocaleString()}</td>
-                                <td class="fw-bold text-dark">Rs. ${Number(item.stock_value ?? 0).toLocaleString()}</td>
+                                <td>PKR ${Number(item.avg_purchase_rate ?? 0).toLocaleString()}</td>
+                                <td class="fw-bold text-dark">PKR ${Number(item.stock_value ?? 0).toLocaleString()}</td>
                             </tr>
                         `;
                     });

@@ -520,7 +520,7 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-info">
-                    <strong>Current Week Total:</strong> Rs. <span id="totalAdvanceAmount">0.00</span>
+                    <strong>Current Week Total:</strong> PKR <span id="totalAdvanceAmount">0.00</span>
                 </div>
                 <table class="table table-bordered">
                     <thead class="table-light">
@@ -718,7 +718,7 @@
                     html += `
                         <tr>
                             <td>${adv.date}</td>
-                            <td>Rs. ${parseFloat(adv.adjust_amount).toFixed(2)}</td>
+                            <td>PKR ${parseFloat(adv.adjust_amount).toFixed(2)}</td>
                             <td>${adv.remarks || '-'}</td>
                         </tr>
                     `;

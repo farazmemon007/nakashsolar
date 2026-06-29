@@ -208,7 +208,7 @@
                             <td class="text-center">
                                 <span class="badge bg-secondary">{{ $qtys[$i] ?? 1 }}</span>
                             </td>
-                            <td class="text-end"><strong>Rs. {{ number_format($amounts[$i] ?? 0, 2) }}</strong></td>
+                            <td class="text-end"><strong>PKR {{ number_format($amounts[$i] ?? 0, 2) }}</strong></td>
                         </tr>
                     @empty
                         <tr>
@@ -272,11 +272,11 @@
                                     <div class="row text-center">
                                         <div class="col-6 border-end">
                                             <small class="text-muted d-block">Amount</small>
-                                            <strong class="text-success">Rs. {{ number_format($job->total_amount, 2) }}</strong>
+                                            <strong class="text-success">PKR {{ number_format($job->total_amount, 2) }}</strong>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted d-block">Paid</small>
-                                            <strong class="text-primary">Rs. {{ number_format($job->paid_amount, 2) }}</strong>
+                                            <strong class="text-primary">PKR {{ number_format($job->paid_amount, 2) }}</strong>
                                         </div>
                                     </div>
 
@@ -316,32 +316,32 @@
                 <div class="mb-3 pb-3 border-bottom">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Grand Total:</span>
-                        <strong>Rs. {{ number_format($sale->grand_total, 2) }}</strong>
+                        <strong>PKR {{ number_format($sale->grand_total, 2) }}</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Discount:</span>
-                        <span class="text-danger">- Rs. {{ number_format($sale->discount_value, 2) }}</span>
+                        <span class="text-danger">- PKR {{ number_format($sale->discount_value, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Net Amount:</span>
-                        <strong class="text-primary">Rs. {{ number_format($sale->net_amount, 2) }}</strong>
+                        <strong class="text-primary">PKR {{ number_format($sale->net_amount, 2) }}</strong>
                     </div>
                 </div>
 
                 <div class="mb-3 pb-3 border-bottom">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Advance Paid:</span>
-                        <span class="text-success">Rs. {{ number_format($sale->advance_amount ?? 0, 2) }}</span>
+                        <span class="text-success">PKR {{ number_format($sale->advance_amount ?? 0, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Remaining:</span>
-                        <strong class="text-warning">Rs. {{ number_format($sale->remaining_amount ?? 0, 2) }}</strong>
+                        <strong class="text-warning">PKR {{ number_format($sale->remaining_amount ?? 0, 2) }}</strong>
                     </div>
                 </div>
 
                 <div class="amount-highlight text-center">
                     <small class="d-block mb-1 opacity-75">Balance Due</small>
-                    <h3 class="mb-0">Rs. {{ number_format($sale->remaining_amount ?? 0, 2) }}</h3>
+                    <h3 class="mb-0">PKR {{ number_format($sale->remaining_amount ?? 0, 2) }}</h3>
                 </div>
             </div>
         </div>

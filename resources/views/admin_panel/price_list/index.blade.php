@@ -241,7 +241,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Price (Rs.) <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold">Price (PKR) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="rate" required placeholder="Enter price" min="0" step="0.01">
                     </div>
 
@@ -308,7 +308,7 @@ function openAddModal() {
 function loadHeaders() {
     $.get('{{ url("/price-list/headers") }}', function(response) {
         let options = '';
-        response.headers.forEach(h => {
+        response.headePKRforEach(h => {
             options += `<option value="${h}">`;
         });
         document.getElementById('headerOptions').innerHTML = options;

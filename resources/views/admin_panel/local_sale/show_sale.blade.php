@@ -1,4 +1,4 @@
-@include('admin_panel.include.header_include')
+﻿@include('admin_panel.include.header_include')
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap');

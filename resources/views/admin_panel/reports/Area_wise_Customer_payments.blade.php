@@ -243,13 +243,13 @@
                         let distributorTotal = 0;
                         let customerTotal = 0;
 
-                        totalDistributors += cityDistributors.length;
-                        totalCustomers += cityCustomers.length;
+                        totalDistributors += cityDistributoPKRlength;
+                        totalCustomers += cityCustomePKRlength;
 
                         let cityHTML = `<div class="section-title text-primary fs-5">${city.toUpperCase()}</div>`;
 
                         // ========== DISTRIBUTOR MARKET CREDIT ==========
-                        if (cityDistributors.length > 0) {
+                        if (cityDistributoPKRlength > 0) {
                             cityHTML += `
             <div class="section-title text-info">Distributor Market Credit</div>
             <table class="report-table">
@@ -265,7 +265,7 @@
                 <tbody>
         `;
 
-                            cityDistributors.forEach(dis => {
+                            cityDistributoPKRforEach(dis => {
                                 let bal = parseFloat(dis.balance);
                                 distributorTotal += bal;
 
@@ -287,7 +287,7 @@
                 </tr>
                 <tr class="summary-row">
                     <td colspan="4" class="text-end">Total Distributors in ${city}:</td>
-                    <td>${cityDistributors.length}</td>
+                    <td>${cityDistributoPKRlength}</td>
                 </tr>
                 </tbody>
             </table>
@@ -295,7 +295,7 @@
                         }
 
                         // ========== CUSTOMER MARKET CREDIT ==========
-                        if (cityCustomers.length > 0) {
+                        if (cityCustomePKRlength > 0) {
                             cityHTML += `
             <div class="section-title text-success">Customer Market Credit</div>
             <table class="report-table">
@@ -312,7 +312,7 @@
                 <tbody>
         `;
 
-                            cityCustomers.forEach(cus => {
+                            cityCustomePKRforEach(cus => {
                                 let bal = parseFloat(cus.balance);
                                 customerTotal += bal;
 
@@ -335,7 +335,7 @@
                 </tr>
                 <tr class="summary-row">
                     <td colspan="5" class="text-end">Total Customers in ${city}:</td>
-                    <td>${cityCustomers.length}</td>
+                    <td>${cityCustomePKRlength}</td>
                 </tr>
                 </tbody>
             </table>
@@ -358,10 +358,10 @@
                     // ==== GRAND TOTAL ====
                     $('#reportResults').append(`
         <div class="section-title text-dark text-end fs-5">
-            <strong>Total Distributors: </strong> ${totalDistributors.toLocaleString()}
+            <strong>Total Distributors: </strong> ${totalDistributoPKRtoLocaleString()}
         </div>
         <div class="section-title text-dark text-end fs-5">
-            <strong>Total Customers: </strong> ${totalCustomers.toLocaleString()}
+            <strong>Total Customers: </strong> ${totalCustomePKRtoLocaleString()}
         </div>
         <div class="section-title text-dark text-end fs-5">
             <strong>Grand Credit Amount: </strong> ${grandTotal.toLocaleString()}

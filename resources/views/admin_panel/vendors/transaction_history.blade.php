@@ -90,7 +90,7 @@
                         <div class="col-6 col-lg-3">
                             <div class="stat-card stat-card-indigo">
                                 <div class="stat-icon"><i class="fa fa-wallet"></i></div>
-                                <div class="stat-value" style="font-size:13px;">Rs.{{ number_format($currentBalance, 0) }}</div>
+                                <div class="stat-value" style="font-size:13px;">PKR{{ number_format($currentBalance, 0) }}</div>
                                 <div class="stat-label">Current Balance</div>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                                         </small>
                                     </td>
                                     <td class="text-end fw-bold text-dark">
-                                        Rs.&nbsp;{{ number_format($purchase->grand_total, 0) }}
+                                        PKR&nbsp;{{ number_format($purchase->grand_total, 0) }}
                                     </td>
                                     <td>
                                         @if($statusVal === 'Returned')
@@ -217,10 +217,10 @@
                     <div class="text-muted small" id="visibleCount">Showing all records</div>
                     <div>
                         <strong class="me-3">Grand Total Purchased:
-                            <span class="text-dark">Rs.&nbsp;{{ number_format($totalPurchases, 0) }}</span>
+                            <span class="text-dark">PKR&nbsp;{{ number_format($totalPurchases, 0) }}</span>
                         </strong>
                         <strong>Balance Due:
-                            <span class="text-danger">Rs.&nbsp;{{ number_format($currentBalance, 0) }}</span>
+                            <span class="text-danger">PKR&nbsp;{{ number_format($currentBalance, 0) }}</span>
                         </strong>
                     </div>
                 </div>

@@ -298,7 +298,7 @@
                                             {{ $completedCount }} Done
                                         </span>
                                         <span class="assignee-stat-pill" style="background:#f0f0ff; color:#7367f0;">
-                                            <i class="fa fa-rupee-sign"></i>
+                                            <i class="fa fa-money-bill-wave"></i>
                                             Total: {{ number_format($group['total_amount']) }}
                                         </span>
                                         <span class="assignee-stat-pill" style="background:#fff0f0; color:#ea5455;">
@@ -795,7 +795,7 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <label class="fw-bold small">Select Customer Order</label>
-                                <input type="text" id="jobSearch" class="form-control mb-2" placeholder="Search orders...">
+                                <input type="text" id="jobSearch" class="form-control mb-2" placeholder="Search ordePKR..">
                                 <select class="form-select" id="jobSelect">
                                     <option value="">-- Choose Order --</option>
                                     @foreach($localSales as $sale)
@@ -1021,7 +1021,7 @@
                     <select class="form-select contractor-select shadow-sm">
                         <option value="">-- Choose Contractor --</option>
                         @foreach($contractors as $contractor)
-                            <option value="{{ $contractor->id }}" data-balance="{{ $contractor->ledger->closing_balance ?? $contractor->opening_balance }}">{{ $contractor->contractor_name }} - Bal: Rs. {{ number_format($contractor->ledger->closing_balance ?? $contractor->opening_balance) }}</option>
+                            <option value="{{ $contractor->id }}" data-balance="{{ $contractor->ledger->closing_balance ?? $contractor->opening_balance }}">{{ $contractor->contractor_name }} - Bal: PKR {{ number_format($contractor->ledger->closing_balance ?? $contractor->opening_balance) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -1030,7 +1030,7 @@
                     <select class="form-select vendor-select shadow-sm">
                         <option value="">-- Choose Vendor --</option>
                         @foreach($vendors as $vendor)
-                            <option value="{{ $vendor->id }}" data-balance="{{ $vendor->ledger->closing_balance ?? $vendor->opening_balance ?? 0 }}">{{ $vendor->Party_name }} - Bal: Rs. {{ number_format($vendor->ledger->closing_balance ?? $vendor->opening_balance ?? 0) }}</option>
+                            <option value="{{ $vendor->id }}" data-balance="{{ $vendor->ledger->closing_balance ?? $vendor->opening_balance ?? 0 }}">{{ $vendor->Party_name }} - Bal: PKR {{ number_format($vendor->ledger->closing_balance ?? $vendor->opening_balance ?? 0) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -1078,7 +1078,7 @@
                 <div class="col-md-3">
                      <label class="small fw-bold text-muted mb-1">Total Bill</label>
                      <div class="input-group input-group-sm mb-2">
-                        <span class="input-group-text bg-white border-end-0">Rs.</span>
+                        <span class="input-group-text bg-white border-end-0">PKR</span>
                         <input type="text" class="form-control border-start-0 fw-bold text-dark total-bill" readonly value="0" style="background:#fff;">
                     </div>
                 </div>
@@ -1086,7 +1086,7 @@
                 <div class="col-md-3">
                     <label class="small fw-bold text-muted mb-1">Paid (Now)</label>
                     <div class="input-group input-group-sm mb-2">
-                        <span class="input-group-text bg-white border-end-0">Rs.</span>
+                        <span class="input-group-text bg-white border-end-0">PKR</span>
                         <input type="number" class="form-control border-start-0 paid-amount fw-bold" placeholder="0">
                     </div>
                 </div>

@@ -83,10 +83,10 @@
                                                                     @endphp
                                                                     <tr>
                                                                         <td>{{ $item }}</td>
-                                                                        <td>Rs. {{ $rates[$index] ?? 0 }}</td>
-                                                                        <td>Rs. {{ $discounts[$index] ?? 0 }}</td>
+                                                                        <td>PKR {{ $rates[$index] ?? 0 }}</td>
+                                                                        <td>PKR {{ $discounts[$index] ?? 0 }}</td>
                                                                         <td>{{ $returnQtys[$index] ?? 0 }}</td>
-                                                                        <td>Rs. {{ number_format($amounts[$index] ?? 0, 2) }}</td>
+                                                                        <td>PKR {{ number_format($amounts[$index] ?? 0, 2) }}</td>
                                                                     </tr>
                                                                 @endforeach
                                                             @endif
@@ -96,7 +96,7 @@
                                             </div>
                                         </td>
                                         <td class="text-end">
-                                            <span class="fw-bold text-danger fs-6">Rs. {{ number_format($purchase->total_return_amount ?? 0) }}</span>
+                                            <span class="fw-bold text-danger fs-6">PKR {{ number_format($purchase->total_return_amount ?? 0) }}</span>
                                         </td>
                                         <td>
                                             <small class="text-muted">{{ \Carbon\Carbon::parse($purchase->created_at)->format('d M Y h:i A') }}</small>

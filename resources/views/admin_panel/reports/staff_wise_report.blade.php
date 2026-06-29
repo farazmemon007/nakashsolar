@@ -39,20 +39,20 @@
                                         <small>Total Weeks</small>
                                     </div>
                                     <div class="col-md-2">
-                                        <h5>Rs. {{ number_format($summary->total_weekly_amount ?? 0, 0) }}</h5>
+                                        <h5>PKR {{ number_format($summary->total_weekly_amount ?? 0, 0) }}</h5>
                                         <small>Total Weekly Amount</small>
                                     </div>
                                     <div class="col-md-2">
-                                        <h5>Rs. {{ number_format($summary->total_advances ?? 0, 0) }}</h5>
+                                        <h5>PKR {{ number_format($summary->total_advances ?? 0, 0) }}</h5>
                                         <small>Total Advances</small>
                                     </div>
                                     <div class="col-md-2">
-                                        <h5>Rs. {{ number_format($summary->total_paid ?? 0, 0) }}</h5>
+                                        <h5>PKR {{ number_format($summary->total_paid ?? 0, 0) }}</h5>
                                         <small>Total Paid</small>
                                     </div>
                                     <div class="col-md-2">
                                         <h5 class="{{ ($summary->total_balance ?? 0) > 0 ? 'text-warning' : 'text-success' }}">
-                                            Rs. {{ number_format($summary->total_balance ?? 0, 0) }}
+                                            PKR {{ number_format($summary->total_balance ?? 0, 0) }}
                                         </h5>
                                         <small>Total Balance</small>
                                     </div>
@@ -531,10 +531,10 @@
                         <td>${staff.staff_name || 'N/A'}</td>
                         <td class="text-center">${staff.designation || '-'}</td>
                         <td class="text-center">${staff.total_weeks || 0}</td>
-                        <td class="text-end">Rs. ${Number(staff.total_weekly || 0).toLocaleString()}</td>
-                        <td class="text-end">Rs. ${Number(staff.total_advance || 0).toLocaleString()}</td>
-                        <td class="text-end">Rs. ${Number(staff.total_paid || 0).toLocaleString()}</td>
-                        <td class="text-end ${balanceClass}">Rs. ${Number(staff.current_balance || 0).toLocaleString()}</td>
+                        <td class="text-end">PKR ${Number(staff.total_weekly || 0).toLocaleString()}</td>
+                        <td class="text-end">PKR ${Number(staff.total_advance || 0).toLocaleString()}</td>
+                        <td class="text-end">PKR ${Number(staff.total_paid || 0).toLocaleString()}</td>
+                        <td class="text-end ${balanceClass}">PKR ${Number(staff.current_balance || 0).toLocaleString()}</td>
                     </tr>`;
                 });
             }

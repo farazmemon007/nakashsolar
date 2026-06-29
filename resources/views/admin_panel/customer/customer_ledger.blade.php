@@ -47,10 +47,10 @@
                                                 <span class="fw-semibold">{{ $ledger->Customer ? $ledger->Customer->customer_name : '-' }}</span>
                                             </div>
                                         </td>
-                                        <td>Rs. {{ number_format($ledger->opening_balance, 0) }}</td>
-                                        <td>Rs. {{ number_format($ledger->previous_balance, 0) }}</td>
+                                        <td>PKR {{ number_format($ledger->opening_balance, 0) }}</td>
+                                        <td>PKR {{ number_format($ledger->previous_balance, 0) }}</td>
                                         <td id="closing_balance_{{ $ledger->id }}">
-                                            <span class="fw-bold text-danger">Rs. {{ number_format($ledger->closing_balance, 0) }}</span>
+                                            <span class="fw-bold text-danger">PKR {{ number_format($ledger->closing_balance, 0) }}</span>
                                         </td>
                                         <td><small class="text-muted">{{ $ledger->updated_at->format('d M Y h:i A') }}</small></td>
                                         <td class="text-center">
@@ -200,7 +200,7 @@
             var customerName = button.getAttribute('data-customer-name');
 
             document.getElementById('ledger_id').value = ledgerId;
-            document.getElementById('closing_balance').value = 'Rs. ' + Number(closingBalance).toLocaleString();
+            document.getElementById('closing_balance').value = 'PKR ' + Number(closingBalance).toLocaleString();
             document.getElementById('customer_name_display').textContent = customerName;
         });
 
@@ -222,7 +222,7 @@
                         var ledgerId = document.getElementById('ledger_id').value;
                         var newClosingBalance = data.new_closing_balance;
                         document.getElementById('closing_balance_' + ledgerId).innerHTML =
-                            '<span class="fw-bold text-danger">Rs. ' + newClosingBalance + '</span>';
+                            '<span class="fw-bold text-danger">PKR ' + newClosingBalance + '</span>';
 
                         var recoveryModalInstance = bootstrap.Modal.getInstance(document.getElementById('recoveryModal'));
                         recoveryModalInstance.hide();
@@ -277,7 +277,7 @@
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${payment.date}</td>
-                                    <td class="fw-bold text-success">Rs. ${Number(payment.amount_paid).toLocaleString()}</td>
+                                    <td class="fw-bold text-success">PKR ${Number(payment.amount_paid).toLocaleString()}</td>
                                     <td>${payment.remarks || '-'}</td>
                                     <td><small class="text-muted">${payment.created_at}</small></td>
                                 </tr>

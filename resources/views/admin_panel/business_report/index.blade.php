@@ -359,7 +359,7 @@
                                 <small style="opacity:0.8">Jobs Amount - All Expenses</small>
                             </div>
                             <div class="profit-value">
-                                Rs. {{ number_format(abs($summaryStats['net_profit'])) }}
+                                PKR {{ number_format(abs($summaryStats['net_profit'])) }}
                             </div>
                             <div style="font-size:3rem; opacity:0.5">
                                 <i class="fas {{ $summaryStats['net_profit'] >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }}"></i>

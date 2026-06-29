@@ -77,7 +77,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="5" class="opening-balance">Opening Balance:</td>
-                                        <td id="openingBalance">Rs. 0</td>
+                                        <td id="openingBalance">PKR 0</td>
                                     </tr>
                                 </thead>
                                 <tbody id="ledgerData"></tbody>
@@ -283,7 +283,7 @@
                             <td class="fw-bold">Opening Balance</td>
                             <td>-</td>
                             <td>-</td>
-                            <td class="fw-bold text-primary">Rs. ${openingBalance.toFixed(2)}</td>
+                            <td class="fw-bold text-primary">PKR ${openingBalance.toFixed(2)}</td>
                         </tr>
                     `;
 
@@ -298,9 +298,9 @@
                                     <td>${formatDate(entry.date)}</td>
                                     <td>${entry.invoice_number || '-'}</td>
                                     <td>To Sale A/c</td>
-                                    <td>Rs. ${debit.toFixed(2)}</td>
+                                    <td>PKR ${debit.toFixed(2)}</td>
                                     <td>-</td>
-                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
                                 </tr>`;
                         } else if (entry.type === 'recovery') {
                             let credit = entry.amount;
@@ -312,8 +312,8 @@
                                     <td>-</td>
                                     <td>${entry.remarks || 'Recovery'}</td>
                                     <td>-</td>
-                                    <td>Rs. ${credit.toFixed(2)}</td>
-                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                                    <td>PKR ${credit.toFixed(2)}</td>
+                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
                                 </tr>`;
                         } else if (entry.type === 'journal_receipt') {
                             let credit = entry.amount;
@@ -325,8 +325,8 @@
                                     <td>-</td>
                                     <td class="text-success fw-bold">Receipt Voucher<br><small class="text-muted">${entry.remarks || ''}</small></td>
                                     <td>-</td>
-                                    <td class="text-success fw-bold">Rs. ${credit.toFixed(2)}</td>
-                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                                    <td class="text-success fw-bold">PKR ${credit.toFixed(2)}</td>
+                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
                                 </tr>`;
                         } else if (entry.type === 'sale_return') {
                             let credit = entry.amount;
@@ -338,8 +338,8 @@
                                     <td>-</td>
                                     <td class="text-danger fw-bold">Sale Return: ${entry.reason || 'N/A'}</td>
                                     <td>-</td>
-                                    <td class="text-danger fw-bold">Rs. ${credit.toFixed(2)}</td>
-                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                                    <td class="text-danger fw-bold">PKR ${credit.toFixed(2)}</td>
+                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
                                 </tr>`;
                         } else if (entry.type === 'advance') {
                             let credit = entry.amount;
@@ -351,8 +351,8 @@
                                     <td>${entry.invoice_number || '-'}</td>
                                     <td class="text-success fw-bold">Advance Payment (Cash)</td>
                                     <td>-</td>
-                                    <td class="text-success fw-bold">Rs. ${credit.toFixed(2)}</td>
-                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${balance.toFixed(2)}</td>
+                                    <td class="text-success fw-bold">PKR ${credit.toFixed(2)}</td>
+                                    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${balance.toFixed(2)}</td>
                                 </tr>`;
                         }
                         ledgerHTML += rowHtml;
@@ -360,10 +360,10 @@
 
                     // Render
                     $('#ledgerData').html(ledgerHTML);
-                    $('#openingBalance').text(`Rs. ${openingBalance.toFixed(2)}`);
-                    $('#totalDebit').text(`Rs. ${totalDebit.toFixed(2)}`);
-                    $('#totalCredit').text(`Rs. ${totalCredit.toFixed(2)}`);
-                    $('#closingBalance').text(`Rs. ${parseFloat(response.closing_balance).toFixed(2)}`);
+                    $('#openingBalance').text(`PKR ${openingBalance.toFixed(2)}`);
+                    $('#totalDebit').text(`PKR ${totalDebit.toFixed(2)}`);
+                    $('#totalCredit').text(`PKR ${totalCredit.toFixed(2)}`);
+                    $('#closingBalance').text(`PKR ${parseFloat(response.closing_balance).toFixed(2)}`);
 
                     $('#ledgerResult').show();
                     $('#downloadPdf').removeClass('d-none');

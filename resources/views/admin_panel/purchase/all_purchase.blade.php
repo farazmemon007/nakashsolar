@@ -192,7 +192,7 @@
                                             <span class="badge bg-info text-white">{{ $itemCount }} Items</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="fw-bold text-success fs-6">Rs. {{ number_format($purchase->grand_total) }}</span>
+                                            <span class="fw-bold text-success fs-6">PKR {{ number_format($purchase->grand_total) }}</span>
                                         </td>
                                         <td>
                                             @if($purchase->return_status == 1)
@@ -300,7 +300,7 @@
             $('#modal-invoice').text(invoice);
             $('#modal-date').text(date);
             $('#modal-party').text(party);
-            $('#modal-total').text('Rs. ' + total);
+            $('#modal-total').text('PKR ' + total);
             $('#modal-status').text(status);
             $('#modal-invoice-btn').attr('href', invoiceUrl);
 
@@ -318,9 +318,9 @@
                         <tr>
                             <td>${index + 1}</td>
                             <td>${item}</td>
-                            <td class="text-end">Rs. ${Number(rate).toLocaleString()}</td>
+                            <td class="text-end">PKR ${Number(rate).toLocaleString()}</td>
                             <td class="text-end">${pc}</td>
-                            <td class="text-end fw-bold">Rs. ${Number(amount).toLocaleString()}</td>
+                            <td class="text-end fw-bold">PKR ${Number(amount).toLocaleString()}</td>
                         </tr>
                     `);
                 });

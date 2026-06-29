@@ -49,8 +49,8 @@
                                         <td>{{ $k + 1 }}</td>
                                         <td>{{ $p->item_name }}</td>
                                         <td>{{ $p->unit ?? '—' }}</td>
-                                        <td>Rs. {{ number_format($p->wholesale_price, 2) }}</td>
-                                        <td>Rs. {{ number_format($p->retail_price, 2) }}</td>
+                                        <td>PKR {{ number_format($p->wholesale_price, 2) }}</td>
+                                        <td>PKR {{ number_format($p->retail_price, 2) }}</td>
                                         <td>
                                             @php
                                                 $stock = $p->initial_stock ?? 0;

@@ -118,7 +118,7 @@ $('#searchStaff').click(function() {
             $('#staff-name').text(response.report.name);
             $('#staff-phone').text(response.report.phone);
             $('#staff-designation').text(response.report.designation);
-            $('#staff-salary').text('Rs. ' + Number(response.report.salary).toLocaleString());
+            $('#staff-salary').text('PKR ' + Number(response.report.salary).toLocaleString());
             $('#staff-city').text(response.report.city);
             $('#staff-address').text(response.report.address);
 

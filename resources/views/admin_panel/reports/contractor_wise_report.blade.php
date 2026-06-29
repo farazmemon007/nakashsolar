@@ -93,25 +93,25 @@
                         <div class="col-md-3">
                             <div class="balance-card opening">
                                 <h6>OPENING BALANCE</h6>
-                                <h4 id="opening-balance">Rs. 0</h4>
+                                <h4 id="opening-balance">PKR 0</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="balance-card work">
                                 <h6>TOTAL WORK</h6>
-                                <h4 id="total-work">Rs. 0</h4>
+                                <h4 id="total-work">PKR 0</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="balance-card paid">
                                 <h6>TOTAL PAID</h6>
-                                <h4 id="total-paid">Rs. 0</h4>
+                                <h4 id="total-paid">PKR 0</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="balance-card closing">
                                 <h6>CLOSING BALANCE</h6>
-                                <h4 id="closing-balance">Rs. 0</h4>
+                                <h4 id="closing-balance">PKR 0</h4>
                             </div>
                         </div>
                     </div>
@@ -189,7 +189,7 @@
     }
 
     function formatCurrency(amount) {
-        return 'Rs. ' + Number(amount || 0).toLocaleString();
+        return 'PKR ' + Number(amount || 0).toLocaleString();
     }
 
     $('#searchLedger').click(function () {
@@ -239,8 +239,8 @@
                 // Job Orders Table
                 let jobRows = '';
                 let jobTotal = 0, jobPaid = 0, jobRemaining = 0;
-                if (response.job_orders && response.job_orders.length > 0) {
-                    response.job_orders.forEach((job, i) => {
+                if (response.job_orders && response.job_ordePKRlength > 0) {
+                    response.job_ordePKRforEach((job, i) => {
                         jobTotal += parseFloat(job.total_amount || 0);
                         jobPaid += parseFloat(job.paid_amount || 0);
                         jobRemaining += parseFloat(job.remaining_amount || 0);
@@ -305,7 +305,7 @@
                 $('#report-preview').show();
                 $('#no-data').hide();
 
-                if ((!response.job_orders || response.job_orders.length === 0) && 
+                if ((!response.job_orders || response.job_ordePKRlength === 0) && 
                     (!response.payments || response.payments.length === 0)) {
                     $('#no-data').show();
                 }

@@ -1,4 +1,4 @@
-@include('admin_panel.include.header_include')
+﻿@include('admin_panel.include.header_include')
 
 <style>
     :root {

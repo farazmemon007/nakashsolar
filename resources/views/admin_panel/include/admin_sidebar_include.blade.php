@@ -1,4 +1,4 @@
-<style>
+﻿<style>
     /* Active Link Styles */
     #sidebar-menu ul li.active > a {
         background-color: rgba(40, 167, 69, 0.15) !important; /* Transparent dark green background */
@@ -247,11 +247,11 @@
                     @endif
 
                     <!-- User Management -->
-                    @if(auth()->user()->hasPermission('user-management-users.view') || auth()->user()->hasPermission('user-management-roles.view') || auth()->user()->hasPermission('user-management-permissions.view'))
+                    @if(auth()->user()->hasPermission('user-management-usePKRview') || auth()->user()->hasPermission('user-management-roles.view') || auth()->user()->hasPermission('user-management-permissions.view'))
                     <li class="submenu">
                         <a href="javascript:void(0);"><i class="fas fa-users-cog"></i><span> User Management</span> <span class="menu-arrow"></span></a>
                         <ul>
-                            @if(auth()->user()->hasPermission('user-management-users.view'))
+                            @if(auth()->user()->hasPermission('user-management-usePKRview'))
                             <li><a href="{{ route('rbac.users.index') }}"><i class="fas fa-user"></i> Users</a></li>
                             @endif
                             @if(auth()->user()->hasPermission('user-management-roles.view'))

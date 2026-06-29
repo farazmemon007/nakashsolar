@@ -52,7 +52,7 @@
                                                     <td>{{ $customerName }}</td>
                                                     <td>{{ $deliveryDate->format('d M Y') }}</td>
                                                     <td><span class="badge bg-danger">{{ $daysOverdue }} days</span></td>
-                                                    <td>Rs. {{ number_format($sale->net_amount) }}</td>
+                                                    <td>PKR {{ number_format($sale->net_amount) }}</td>
                                                     <td><span class="badge bg-warning">{{ ucfirst($sale->job_status) }}</span></td>
                                                     <td>
                                                         <a href="{{ route('all-local-sale') }}" class="btn btn-sm btn-primary">
@@ -122,7 +122,7 @@
                                                             <span class="badge bg-primary">{{ $daysLeft }} days</span>
                                                         @endif
                                                     </td>
-                                                    <td>Rs. {{ number_format($sale->net_amount) }}</td>
+                                                    <td>PKR {{ number_format($sale->net_amount) }}</td>
                                                     <td><span class="badge bg-secondary">{{ ucfirst($sale->job_status) }}</span></td>
                                                     <td>
                                                         <a href="{{ route('all-local-sale') }}" class="btn btn-sm btn-primary">

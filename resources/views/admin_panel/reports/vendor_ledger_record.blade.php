@@ -82,7 +82,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="6" class="text-end fw-bold">Opening Balance:</td>
-                                        <td id="openingBalance" class="fw-bold">Rs. 0</td>
+                                        <td id="openingBalance" class="fw-bold">PKR 0</td>
                                     </tr>
                                 </thead>
                                 <tbody id="ledgerData"></tbody>
@@ -189,7 +189,7 @@
                     <td class="fw-bold">Opening Balance</td>
                     <td>-</td>
                     <td>-</td>
-                    <td class="fw-bold text-primary">Rs. ${balance.toFixed(2)}</td>
+                    <td class="fw-bold text-primary">PKR ${balance.toFixed(2)}</td>
                 </tr>
             `;
 
@@ -249,7 +249,7 @@
 
                     // ✅ Job Orders assigned to Vendor (Debit = total_amount assigned, Credit = paid_amount)
                     if (response.job_orders) {
-                        response.job_orders.forEach(entry => {
+                        response.job_ordePKRforEach(entry => {
                             // Job Assign Entry (Debit - we owe vendor)
                             if (parseFloat(entry.total_amount) > 0) {
                                 allEntries.push({
@@ -318,9 +318,9 @@
             <td>${entry.invoice_number}</td>
             <td>To Purchase A/c</td>
             <td>${itemsHTML}</td>
-            <td>Rs. ${debit.toFixed(2)}</td>
+            <td>PKR ${debit.toFixed(2)}</td>
             <td>-</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'payment') {
                             let credit = entry.amount;
@@ -333,8 +333,8 @@
     <td>Vendor Payment<br><small class="text-muted">${entry.salesman || ''}</small></td>
     <td>-</td>
     <td>-</td>
-    <td>Rs. ${credit.toFixed(2)}</td>
-    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+    <td>PKR ${credit.toFixed(2)}</td>
+    <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
 </tr>
 `;
                         } else if (entry.type === 'receipt') {
@@ -347,9 +347,9 @@
             <td>-</td>
             <td>Vendor Receipt (Received from Vendor)<br><small class="text-muted">${entry.remarks || ''}</small></td>
             <td>-</td>
-            <td class="text-success fw-bold">Rs. ${debit.toFixed(2)}</td>
+            <td class="text-success fw-bold">PKR ${debit.toFixed(2)}</td>
             <td>-</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'builty') {
                             let debit = entry.amount;
@@ -361,9 +361,9 @@
         <td>-</td>
         <td>${entry.description ?? 'Vendor Builty Entry'}</td>
         <td>-</td>
-        <td>Rs. ${debit.toFixed(2)}</td>
+        <td>PKR ${debit.toFixed(2)}</td>
         <td>-</td>
-        <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+        <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
     </tr>`;
                         } else if (entry.type === 'return') {
                             let credit = entry.amount;
@@ -376,8 +376,8 @@
             <td>Purchase Return</td>
             <td>-</td>
             <td>-</td>
-            <td>Rs. ${credit.toFixed(2)}</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td>PKR ${credit.toFixed(2)}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'sale') {
                             let credit = entry.amount;
@@ -390,8 +390,8 @@
             <td>Local Sale</td>
             <td><button class="btn btn-sm btn-info show-items-btn" data-inv="${entry.invoice_number}" data-type="sale" style="cursor:pointer;">View Items</button></td>
             <td>-</td>
-            <td>Rs. ${credit.toFixed(2)}</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td>PKR ${credit.toFixed(2)}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'sale_advance') {
                             let debit = entry.amount;
@@ -403,9 +403,9 @@
             <td>${entry.invoice_number}</td>
             <td>Advance Received via Local Sale</td>
             <td>-</td>
-            <td>Rs. ${debit.toFixed(2)}</td>
+            <td>PKR ${debit.toFixed(2)}</td>
             <td>-</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'job_assigned') {
                             let debit = entry.amount;
@@ -421,9 +421,9 @@
             <td>${entry.job_number || '-'}</td>
             <td>Job Assigned to Vendor ${statusBadge}<br><small class="text-muted">${entry.description || ''}</small></td>
             <td>-</td>
-            <td>Rs. ${debit.toFixed(2)}</td>
+            <td>PKR ${debit.toFixed(2)}</td>
             <td>-</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         } else if (entry.type === 'job_payment') {
                             let credit = entry.amount;
@@ -436,8 +436,8 @@
             <td>Job Payment Paid<br><small class="text-muted">${entry.description || ''}</small></td>
             <td>-</td>
             <td>-</td>
-            <td>Rs. ${credit.toFixed(2)}</td>
-            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">Rs. ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
+            <td>PKR ${credit.toFixed(2)}</td>
+            <td class="fw-bold ${balance < 0 ? 'text-danger' : 'text-success'}">PKR ${Math.abs(balance).toFixed(2)} ${balance > 0 ? 'Cr' : (balance < 0 ? 'Dr' : '')}</td>
         </tr>`;
                         }
 
@@ -450,12 +450,12 @@
                     let ob = parseFloat(openingBalance);
                     let cb = parseFloat(response.closing_balance);
                     
-                    $('#openingBalance').text(`Rs. ${Math.abs(ob).toFixed(2)} ${ob > 0 ? 'Cr' : (ob < 0 ? 'Dr' : '')}`);
-                    $('#totalDebit').text(`Rs. ${totalDebit.toFixed(2)}`);
-                    $('#totalCredit').text(`Rs. ${totalCredit.toFixed(2)}`);
+                    $('#openingBalance').text(`PKR ${Math.abs(ob).toFixed(2)} ${ob > 0 ? 'Cr' : (ob < 0 ? 'Dr' : '')}`);
+                    $('#totalDebit').text(`PKR ${totalDebit.toFixed(2)}`);
+                    $('#totalCredit').text(`PKR ${totalCredit.toFixed(2)}`);
 
                     // Closing balance directly from API response
-                    $('#closingBalance').text(`Rs. ${Math.abs(cb).toFixed(2)} ${cb > 0 ? 'Cr' : (cb < 0 ? 'Dr' : '')}`);
+                    $('#closingBalance').text(`PKR ${Math.abs(cb).toFixed(2)} ${cb > 0 ? 'Cr' : (cb < 0 ? 'Dr' : '')}`);
 
                     // Store data for items modal
                     window.allItemsData = {};

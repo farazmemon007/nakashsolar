@@ -84,15 +84,15 @@
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="stat-card stat-card-purple">
-                                <div class="stat-icon"><i class="fa fa-rupee-sign"></i></div>
-                                <div class="stat-value" style="font-size:13px;">Rs.{{ number_format($totalLocalSales, 0) }}</div>
+                                <div class="stat-icon"><i class="fa fa-money-bill-wave"></i></div>
+                                <div class="stat-value" style="font-size:13px;">PKR{{ number_format($totalLocalSales, 0) }}</div>
                                 <div class="stat-label">Total Amount</div>
                             </div>
                         </div>
                         <div class="col-6 col-lg-3">
                             <div class="stat-card {{ $currentBalance > 0 ? 'stat-card-red' : 'stat-card-teal' }}">
                                 <div class="stat-icon"><i class="fa fa-wallet"></i></div>
-                                <div class="stat-value" style="font-size:13px;">Rs.{{ number_format($currentBalance, 0) }}</div>
+                                <div class="stat-value" style="font-size:13px;">PKR{{ number_format($currentBalance, 0) }}</div>
                                 <div class="stat-label">Current Balance</div>
                             </div>
                         </div>
@@ -177,7 +177,7 @@
                                         <small class="text-muted">{{ $itemPreview ?: '-' }}</small>
                                     </td>
                                     <td class="text-end fw-bold text-success">
-                                        Rs.&nbsp;{{ number_format($sale->net_amount, 0) }}
+                                        PKR&nbsp;{{ number_format($sale->net_amount, 0) }}
                                     </td>
                                     <td>
                                         @if($sale->job_status == 'completed')
@@ -221,7 +221,7 @@
                     <div class="text-muted small" id="visibleCount">Showing all records</div>
                     <div>
                         <strong>Grand Total:
-                            <span class="text-primary">Rs.&nbsp;{{ number_format($totalLocalSales, 0) }}</span>
+                            <span class="text-primary">PKR&nbsp;{{ number_format($totalLocalSales, 0) }}</span>
                         </strong>
                     </div>
                 </div>
