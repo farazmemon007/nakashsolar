@@ -196,7 +196,7 @@
                         </button>
                     </div>
                     <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addJobModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Job Order
+                        <img src="{{ asset('assets/img/icons/plus.svg') }}" class="me-1" alt="img">Add Job Order
                     </button>
                 </div>
             </div>

@@ -16,7 +16,7 @@
 
                 <div class="page-btn">
                     <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addStockOutModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add StockOut
+                        <img src="{{ asset('assets/img/icons/plus.svg') }}" class="me-1" alt="img">Add StockOut
                     </button>
                 </div>
             </div>

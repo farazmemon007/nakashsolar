@@ -12,7 +12,7 @@
                 </div>
                 <div class="page-btn">
                     <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSalesmanModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Staff
+                        <img src="{{ asset('assets/img/icons/plus.svg') }}" class="me-1" alt="img">Add Staff
                     </button>
                 </div>
             </div>

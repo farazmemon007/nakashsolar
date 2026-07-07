@@ -13,7 +13,7 @@
                 <div class="page-btn">
                     @if(Auth::user()->usertype === 'admin')
                         <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addSizeModal">
-                            <img src="assets/img/icons/plus.svg" class="me-1" alt="img">Add Size
+                            <img src="{{ asset('assets/img/icons/plus.svg') }}" class="me-1" alt="img">Add Size
                         </button>
                     @else
                         <button class="btn btn-sm btn-danger d-none" disabled>No Action</button>

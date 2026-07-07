@@ -12,7 +12,7 @@
                 </div>
                 <div class="page-btn">
                     <button class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addBusinessTypeModal">
-                        <img src="assets/img/icons/plus.svg" class="me-1" alt="img"> Add Business Type
+                        <img src="{{ asset('assets/img/icons/plus.svg') }}" class="me-1" alt="img"> Add Business Type
                     </button>
                 </div>
             </div>
