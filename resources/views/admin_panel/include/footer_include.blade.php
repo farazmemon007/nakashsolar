@@ -2,26 +2,26 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- jQuery -->
-<script src="{{ url('assets/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}"></script>
 
 <!-- Bootstrap & Plugins -->
-<script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url('assets/js/feather.min.js') }}"></script>
-<script src="{{ url('assets/js/jquery.slimscroll.min.js') }}"></script>
+<script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/js/feather.min.js') }}"></script>
+<script src="{{ asset('assets/js/jquery.slimscroll.min.js') }}"></script>
 
 <!-- DataTables -->
-<script src="{{ url('assets/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ url('assets/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/js/dataTables.bootstrap4.min.js') }}"></script>
 
 <!-- ApexCharts -->
-<script src="{{ url('assets/plugins/apexchart/apexcharts.min.js') }}"></script>
-<script src="{{ url('assets/plugins/apexchart/chart-data.js') }}"></script>
+<script src="{{ asset('assets/plugins/apexchart/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets/plugins/apexchart/chart-data.js') }}"></script>
 
 <!-- Select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script src="{{ url('assets/js/script.js') }}?v=3"></script>
+<script src="{{ asset('assets/js/script.js') }}?v=3"></script>
 
 <script>
     $(document).ready(function () {
