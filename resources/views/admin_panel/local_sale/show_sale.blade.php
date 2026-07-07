@@ -11,22 +11,40 @@
 
     body {
         font-family: 'Fira Sans', sans-serif;
-        background-color: #f5f5f5;
+        background-color: #f4f4f4;
+        padding: 0;
+        overflow: auto;
+    }
+
+    .invoice-preview-shell {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        padding: 50px 0 80px 0;
     }
 
     .invoice-container {
-        max-width: 900px;
-        margin: 30px auto;
+        width: 100%;
+        max-width: 150mm;
+        min-height: auto;
+        margin: 0 auto;
         background: white;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ddd;
+        box-shadow: 0 0 1px rgba(0,0,0,0.01);
+        padding: 1.2mm;
+        position: relative;
+        transform: scale(0.78);
+        transform-origin: top center;
+        display: block;
     }
 
     .invoice-header {
-        border-bottom: 3px solid #000;
-        padding: 20px 30px;
+        border-bottom: 2px solid #000;
+        padding: 10px 16px;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        gap: 12px;
     }
 
     .company-logo h1 {
@@ -47,7 +65,7 @@
     }
 
     .invoice-title h2 {
-        font-size: 24px;
+        font-size: 18px;
         font-weight: bold;
         margin: 0;
         color: #000;
@@ -62,13 +80,13 @@
     .invoice-info-section {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        padding: 20px 30px;
+        gap: 10px;
+        padding: 10px 16px;
         border-bottom: 1px solid #ddd;
     }
 
     .info-block {
-        padding: 15px;
+        padding: 8px 10px;
         border: 1px solid #ddd;
     }
 
@@ -95,7 +113,7 @@
     .invoice-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 20px 0;
+        margin: 10px 0;
     }
 
     .invoice-table thead {
@@ -104,16 +122,16 @@
     }
 
     .invoice-table th {
-        padding: 12px 10px;
-        font-size: 12px;
+        padding: 6px 8px;
+        font-size: 10px;
         font-weight: bold;
         text-align: left;
         border: 1px solid #000;
     }
 
     .invoice-table td {
-        padding: 10px;
-        font-size: 12px;
+        padding: 6px 8px;
+        font-size: 10px;
         border: 1px solid #ddd;
         color: #333;
     }
@@ -124,9 +142,9 @@
 
     .summary-section {
         display: grid;
-        grid-template-columns: 1fr 400px;
-        gap: 20px;
-        padding: 20px 30px;
+        grid-template-columns: 1fr 320px;
+        gap: 12px;
+        padding: 10px 16px;
         border-top: 2px solid #000;
     }
 
@@ -137,7 +155,7 @@
     }
 
     .ledger-section {
-        padding: 15px;
+        padding: 10px;
         border: 1px solid #ddd;
     }
 
@@ -170,7 +188,7 @@
 
     .totals-box {
         border: 2px solid #000;
-        padding: 15px;
+        padding: 10px;
     }
 
     .summary-section.estimate-summary .totals-box {
@@ -182,8 +200,8 @@
     .total-row {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
-        font-size: 12px;
+        padding: 5px 0;
+        font-size: 10px;
         border-bottom: 1px solid #ddd;
     }
 
@@ -205,13 +223,13 @@
     .signature-section {
         display: flex;
         justify-content: space-between;
-        padding: 40px 30px 20px 30px;
-        margin-top: 30px;
+        padding: 16px 16px 10px 16px;
+        margin-top: 10px;
     }
 
     .signature-box {
         text-align: center;
-        width: 200px;
+        width: 140px;
     }
 
     .signature-line {
@@ -241,8 +259,8 @@
     }
 
     .terms-conditions-block {
-        margin: 20px 30px 0 30px;
-        padding: 15px;
+        margin: 10px 16px 0 16px;
+        padding: 10px;
         border: 1px solid #ddd;
         border-left: 4px solid #000;
         background-color: #f9f9f9;
@@ -264,7 +282,7 @@
         margin: 0;
         line-height: 1.6;
     }
-    
+
     .terms-conditions-block ul li {
         margin-bottom: 4px;
     }
@@ -275,22 +293,29 @@
 
     @media print {
         body { background: white; }
-        .invoice-container { 
-            margin: 0; 
-            max-width: 100%; 
+        .invoice-preview-shell {
+            min-height: auto;
+            padding: 0;
+        }
+        .invoice-container {
+            margin: 0;
+            max-width: 100%;
             box-shadow: none;
+            position: static;
+            transform: none;
         }
         .no-print { display: none !important; }
     }
 </style>
 
-<div class="no-print" style="max-width: 900px; margin: 30px auto 0 auto;">
-    <a href="{{ route('local-sale') }}" style="display: inline-block; padding: 10px 20px; background-color: #16a34a; color: #fff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">
+<div class="no-print" style="position: fixed; top: 12px; right: 12px; z-index: 9999;">
+    <a href="{{ route('local-sale') }}" style="display: inline-block; padding: 10px 20px; background-color: #16a34a; color: #fff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
         &larr; Create New Sale
     </a>
 </div>
 
-<div class="invoice-container">
+<div class="invoice-preview-shell">
+    <div class="invoice-container">
     <div class="invoice-header">
         <div class="company-logo">
             @if($appSettings['company_logo'])
@@ -348,7 +373,7 @@
             <p>{{ !empty($party->address) ? $party->address : 'Address Not Provided' }}</p>
             <p>Phone: {{ $party->phone ?: 'N/A' }}</p>
         </div>
-        
+
         <div class="info-block">
             <div class="info-block-title">Invoice Details</div>
             <p><strong>Invoice No:</strong> #{{ $sale->invoice_number }}</p>
@@ -493,6 +518,7 @@
             <i class="fa fa-copy me-1"></i>Clone Estimate
         </a>
     </div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

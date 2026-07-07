@@ -47,6 +47,15 @@
             font-size: 22px;
             font-weight: 600;
             color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .company-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1c9262;
+            margin-bottom: 8px;
+            text-align: center;
         }
 
         .wrapper h2::before {
@@ -158,7 +167,8 @@
     </style>
     <div class="wrapper">
         <div style="width:100%; text-align:center;">
-            <h2> Green Vision Login</h2>
+            <div class="company-title">{{ $appSettings['company_name'] }}</div>
+            <h2>Login</h2>
             {{-- <img src="logo.png" alt="image" style="width: 250px;"> --}}
 
         </div>
